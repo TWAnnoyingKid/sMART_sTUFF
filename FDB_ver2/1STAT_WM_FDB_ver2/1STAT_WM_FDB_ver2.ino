@@ -23,7 +23,7 @@ String header;
 String output1State = "off";
 
 const int output1 = D1;
-int rs = 14;
+const int rs = D4;
 int RS; 
 
 unsigned long currentTime = millis();
