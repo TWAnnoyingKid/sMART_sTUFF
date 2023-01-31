@@ -13,7 +13,7 @@
 
 String ele = "3stat";
 
-SSD1306 display(0x3c, D6, D7);  //D6:SDA D7:SCL
+SSD1306 display(0x3c, D6, D7);  //SDA SCL
 QRcode qrcode (&display);
 
 WiFiServer server(80);
@@ -27,7 +27,7 @@ String output3State = "off";
 const int output1 = D1;
 const int output2 = D2;
 const int output3 = D3;
-int rs = 14;
+const int rs = D4;
 int RS; 
 
 unsigned long currentTime = millis();
@@ -52,14 +52,10 @@ String STAT3 = "";
 void setup() {
   Serial.begin(115200);
   
-  pinMode(output1, OUTPUT);
-  pinMode(output2, OUTPUT);
-  pinMode(output3, OUTPUT);
-  pinMode(rs, INPUT);
-  digitalWrite(output1, LOW);
-  digitalWrite(output2, LOW);
-  digitalWrite(output3, LOW);
-  digitalWrite(rs, HIGH);
+  pinMode(output1, OUTPUT);    digitalWrite(output1, LOW);
+  pinMode(output2, OUTPUT);    digitalWrite(output2, LOW);
+  pinMode(output3, OUTPUT);    digitalWrite(output3, LOW);
+  pinMode(rs, INPUT_PULLUP);   digitalWrite(rs, HIGH);
   
   WiFiManager wifiManager;
 
