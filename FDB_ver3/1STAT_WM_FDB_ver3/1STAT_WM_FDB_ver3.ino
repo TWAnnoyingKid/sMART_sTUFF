@@ -8,19 +8,15 @@
 #include "addons/TokenHelper.h"
 #include "addons/RTDBHelper.h"
 
-String ele = "3stat";
+String ele = "1stat";
 
 WiFiServer server(80);
 
 String header;
 
 String output1State = "off";
-String output2State = "off";
-String output3State = "off";
 
 const int output1 = D1;
-const int output2 = D2;
-const int output3 = D3;
 const int rs = D4;
 int RS; 
 
@@ -40,16 +36,14 @@ bool signupOK = false;
 String A = "";
 String hs = "";
 String STAT1 = "";
-String STAT2 = "";
-String STAT3 = "";
 
 void setup() {
   Serial.begin(115200);
   
-  pinMode(output1, OUTPUT);    digitalWrite(output1, LOW);
-  pinMode(output2, OUTPUT);    digitalWrite(output2, LOW);
-  pinMode(output3, OUTPUT);    digitalWrite(output3, LOW);
-  pinMode(rs, INPUT_PULLUP);   digitalWrite(rs, HIGH);
+  pinMode(output1, OUTPUT);
+  pinMode(rs, INPUT);
+  digitalWrite(output1, LOW);
+  digitalWrite(rs, HIGH);
   
   WiFiManager wifiManager;
 
@@ -79,8 +73,6 @@ void setup() {
   } 
   
   STAT1 = hs + "/D1";
-  STAT2 = hs + "/D2";
-  STAT3 = hs + "/D3";
   
   config.api_key = API_KEY;
   config.database_url = DATABASE_URL;
@@ -95,8 +87,6 @@ void setup() {
   Firebase.begin(&config, &auth);
   Firebase.reconnectWiFi(true);
   Firebase.RTDB.setString(&fbdo, STAT1, "1");
-  Firebase.RTDB.setString(&fbdo, STAT2, "1");
-  Firebase.RTDB.setString(&fbdo, STAT3, "1");
 
   server.begin();
 }
@@ -116,32 +106,7 @@ void loop(){
       digitalWrite(output1, LOW);
     }
   }
-
-  if (Firebase.RTDB.getString(&fbdo, STAT2)) {
-    if (fbdo.stringData() == "0") {
-      Serial.println("D2 off");
-      output1State = "off";
-      digitalWrite(output2, HIGH);
-    }
-    else if (fbdo.stringData() == "1") {
-      Serial.println("D2 on");
-      output1State = "on";
-      digitalWrite(output2, LOW);
-    }
-  }
-
-  if (Firebase.RTDB.getString(&fbdo, STAT3)) {
-    if (fbdo.stringData() == "0") {
-      Serial.println("D3 off");
-      output1State = "off";
-      digitalWrite(output3, HIGH);
-    }
-    else if (fbdo.stringData() == "1") {
-      Serial.println("D3 on");
-      output1State = "on";
-      digitalWrite(output3, LOW);
-    }
-  }
+  delay(10);
 
   if (client) {                           
     Serial.println("New Client.");       
@@ -171,23 +136,7 @@ void loop(){
               Serial.println("D1 off");
               output1State = "off";
               digitalWrite(output1, HIGH);
-            } else if (header.indexOf("GET /2/on") >= 0) {
-              Serial.println("D2 on");
-              output2State = "on";
-              digitalWrite(output2, LOW);
-            } else if (header.indexOf("GET /2/off") >= 0) {
-              Serial.println("D2 off");
-              output2State = "off";
-              digitalWrite(output2, HIGH);
-            }else if (header.indexOf("GET /3/on") >= 0) {
-              Serial.println("D3 on");
-              output3State = "on";
-              digitalWrite(output3, LOW);
-            } else if (header.indexOf("GET /3/off") >= 0) {
-              Serial.println("D3 off");
-              output3State = "off";
-              digitalWrite(output3, HIGH);
-            }
+            } 
             
 
             client.println("<!DOCTYPE html><html>");
@@ -203,7 +152,7 @@ void loop(){
 
             client.println("<body><h1>IP=" + A + "</h1>");
             client.println("<body><h2>ELEMENT=" + ele + "</h2>");
-            client.println("<body><h3>裝置名稱 = sMART sTUFF 三插座智慧延長線</h3>");
+            client.println("<body><h3>裝置名稱 = sMART sTUFF 單插座智慧延長線</h3>");
             
 
             client.println("<p>D1 - State " + output1State + "</p>");
@@ -212,22 +161,6 @@ void loop(){
             } else {
               client.println("<p><a href=\"/1/off\"><button class=\"button button2\">OFF</button></a></p>");
             } 
-               
- 
-            client.println("<p>D2 - State " + output2State + "</p>");
-            if (output2State=="off") {
-              client.println("<p><a href=\"/2/on\"><button class=\"button\">ON</button></a></p>");
-            } else {
-              client.println("<p><a href=\"/2/off\"><button class=\"button button2\">OFF</button></a></p>");
-            }
-
-            client.println("<p>D3 - State " + output3State + "</p>");
-            if (output3State=="off") {
-              client.println("<p><a href=\"/3/on\"><button class=\"button\">ON</button></a></p>");
-            } else {
-              client.println("<p><a href=\"/3/off\"><button class=\"button button2\">OFF</button></a></p>");
-            } 
-            
             client.println("</body></html>");
             
             client.println();
