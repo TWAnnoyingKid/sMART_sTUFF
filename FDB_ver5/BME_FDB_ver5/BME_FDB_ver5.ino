@@ -137,7 +137,7 @@ void loop(){
             client.println("</head>");
             
 
-            client.println("<body><h1>IP=" + A + "</h1>");
+            client.println("<body><h1>MAC=" + A + "</h1>");
             client.println("<body><h2>ELEMENT=" + ele + "</h2>");
             client.println("<body><h3>裝置名稱 = sMART sTUFF 溫溼度感測器</h3>");
 
