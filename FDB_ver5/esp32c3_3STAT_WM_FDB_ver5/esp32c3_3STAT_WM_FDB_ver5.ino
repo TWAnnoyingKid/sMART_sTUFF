@@ -56,6 +56,9 @@ String STAT2 = "";
 String STAT3 = "";
 String CNSTAT = "";
 
+String OnNum = "1";
+String CloseNum = "0";
+
 void setup() {
   Serial.begin(115200);
 
@@ -113,13 +116,6 @@ void setup() {
   config.token_status_callback = tokenStatusCallback;
   Firebase.begin(&config, &auth);
   Firebase.reconnectWiFi(true);
-  
-  Firebase.RTDB.setString(&fbdo_D1, STAT1, "1");
-  Firebase.RTDB.setString(&fbdo_D2, STAT2, "1");
-  Firebase.RTDB.setString(&fbdo_D3, STAT3, "1");
-  Firebase.RTDB.setString(&fbdo_D4, CNSTAT, "0");
-  
-  Serial.println("SET DONE");
 
   if (!Firebase.RTDB.beginStream(&fbdo_D1, STAT1)) {
     Serial.print ("D1 begin error ");
@@ -137,7 +133,11 @@ void setup() {
     Serial.print ("CN begin error ");
     Serial.println(fbdo_D4.errorReason());
   }
-  
+  Firebase.RTDB.setString(&fbdo_D1, STAT1, OnNum);
+  Firebase.RTDB.setString(&fbdo_D2, STAT2, OnNum);
+  Firebase.RTDB.setString(&fbdo_D3, STAT3, OnNum);
+  Firebase.RTDB.setString(&fbdo_D4, CNSTAT, "0");
+
   Serial.println("ALL DONE");
   
   server.begin();
@@ -146,49 +146,76 @@ void setup() {
 
 void loop() {
   ReadStat();
+
   time();
-  WEB();
+  
   button_cahnge_stat();
+
   if (Firebase.isTokenExpired()){
     Firebase.refreshToken(&config);
     Serial.println("Refresh token");
   }
+
 }
 void time() {
   timeClient.update();
   String nowTime = a + timeClient.getHours() + ":" + timeClient.getMinutes() + a;
-  if (timeClient.getSeconds() < 7 & timeClient.getSeconds() > 0) {
-    if (timeClient.getMinutes() == 30 || timeClient.getMinutes() == 0){
+  if (timeClient.getMinutes() == 15 || timeClient.getMinutes() == 30 || timeClient.getMinutes() == 45 || timeClient.getMinutes() == 0){
+    if (timeClient.getSeconds() < 10 & timeClient.getSeconds() > 7) {
       Firebase.RTDB.setString(&fbdo_D4, CNSTAT, "1");
     }
+    if (timeClient.getSeconds() < 14 & timeClient.getSeconds() > 11) {
+      if (digitalRead(output1) == LOW) {
+        Firebase.RTDB.setString(&fbdo_D1, STAT1, OnNum);
+      } else if (digitalRead(output1) == HIGH) {
+        Firebase.RTDB.setString(&fbdo_D1, STAT1, CloseNum);
+      }
+    }
+    if (timeClient.getSeconds() < 18 & timeClient.getSeconds() > 15) {
+      if (digitalRead(output2) == LOW) {
+        Firebase.RTDB.setString(&fbdo_D2, STAT2, OnNum);
+      } else if (digitalRead(output2) == HIGH) {
+        Firebase.RTDB.setString(&fbdo_D2, STAT2, CloseNum);
+      }
+    }
+    if (timeClient.getSeconds() < 21 & timeClient.getSeconds() > 19) {
+      if (digitalRead(output3) == LOW) {
+        Firebase.RTDB.setString(&fbdo_D3, STAT3, OnNum);
+      } else if (digitalRead(output3) == HIGH) {
+        Firebase.RTDB.setString(&fbdo_D3, STAT3, CloseNum);
+      }
+    }
+  }
+  
+  if (timeClient.getSeconds() < 7 & timeClient.getSeconds() > 0) {
     if (Firebase.RTDB.getString(&fbdo, A + "/OT/D1")) {
       if (fbdo.stringData() == nowTime) {
-        Firebase.RTDB.setString(&fbdo_D1, STAT1, "1");
+        Firebase.RTDB.setString(&fbdo_D1, STAT1, OnNum);
       } 
     }
     if (Firebase.RTDB.getString(&fbdo, A + "/CT/D1")) {
       if (fbdo.stringData() == nowTime) {
-        Firebase.RTDB.setString(&fbdo_D1, STAT1, "0");
+        Firebase.RTDB.setString(&fbdo_D1, STAT1, CloseNum);
       }
     }
     if (Firebase.RTDB.getString(&fbdo, A + "/OT/D2")) {
       if (fbdo.stringData() == nowTime) {
-        Firebase.RTDB.setString(&fbdo_D2, STAT2, "1");
+        Firebase.RTDB.setString(&fbdo_D2, STAT2, OnNum);
       }
     }
     if (Firebase.RTDB.getString(&fbdo, A + "/CT/D2")) {
       if (fbdo.stringData() == nowTime) {
-        Firebase.RTDB.setString(&fbdo_D2, STAT2, "0");
+        Firebase.RTDB.setString(&fbdo_D2, STAT2, CloseNum);
       }
     }
     if (Firebase.RTDB.getString(&fbdo, A + "/OT/D3")) {
       if (fbdo.stringData() == nowTime) {
-        Firebase.RTDB.setString(&fbdo_D3, STAT3, "1");
+        Firebase.RTDB.setString(&fbdo_D3, STAT3, OnNum);
       }
     }
     if (Firebase.RTDB.getString(&fbdo, A + "/CT/D3")) {
       if (fbdo.stringData() == nowTime) {
-        Firebase.RTDB.setString(&fbdo_D3, STAT3, "0");
+        Firebase.RTDB.setString(&fbdo_D3, STAT3, CloseNum);
       }
     }
   }
@@ -244,14 +271,14 @@ void ReadStat() {
 
   if (Firebase.ready() && signupOK) {
     if (!Firebase.RTDB.readStream(&fbdo_D1)) {
-      Serial.print("D1 read error");
+      Serial.print("D1 read error：");
       Serial.println(fbdo_D1.errorReason());
     }
     if (fbdo_D1.streamAvailable()) {
-      if (fbdo_D1.stringData() == "0") {
+      if (fbdo_D1.stringData() == CloseNum) {
         digitalWrite(output1, HIGH);
         Serial.println("D1 OFF");
-      } else if (fbdo_D1.stringData() == "1") {
+      } else if (fbdo_D1.stringData() == OnNum) {
         digitalWrite(output1, LOW);
         Serial.println("D1 ON");
       }
@@ -260,14 +287,14 @@ void ReadStat() {
 
   if (Firebase.ready() && signupOK) {
     if (!Firebase.RTDB.readStream(&fbdo_D2)) {
-      Serial.print("D2 read error");
+      Serial.print("D2 read error：");
       Serial.println(fbdo_D2.errorReason());
     }
     if (fbdo_D2.streamAvailable()) {
-      if (fbdo_D2.stringData() == "0") {
+      if (fbdo_D2.stringData() == CloseNum) {
         digitalWrite(output2, HIGH);
         Serial.println("D2 OFF");
-      } else if (fbdo_D2.stringData() == "1") {
+      } else if (fbdo_D2.stringData() == OnNum) {
         digitalWrite(output2, LOW);
         Serial.println("D2 ON");
       }
@@ -276,14 +303,14 @@ void ReadStat() {
 
   if (Firebase.ready() && signupOK) {
     if (!Firebase.RTDB.readStream(&fbdo_D3)) {
-      Serial.print("D3 read error");
+      Serial.print("D3 read error：");
       Serial.println(fbdo_D3.errorReason());
     }
     if (fbdo_D3.streamAvailable()) {
-      if (fbdo_D3.stringData() == "0") {
+      if (fbdo_D3.stringData() == CloseNum) {
         digitalWrite(output3, HIGH);
         Serial.println("D3 OFF");
-      } else if (fbdo_D3.stringData() == "1") {
+      } else if (fbdo_D3.stringData() == OnNum) {
         digitalWrite(output3, LOW);
         Serial.println("D3 ON");
       }
@@ -292,11 +319,11 @@ void ReadStat() {
 
   if (Firebase.ready() && signupOK) {
     if (!Firebase.RTDB.readStream(&fbdo_D4)) {
-      Serial.print("cn read error");
+      Serial.print("cn read error：");
       Serial.println(fbdo_D4.errorReason());
     }
     if (fbdo_D4.streamAvailable()) {
-      if (fbdo_D4.stringData() == "1") {
+      if (fbdo_D4.stringData() == OnNum) {
         Firebase.RTDB.setString(&fbdo_D4, CNSTAT, "2");
       }
     }
@@ -305,30 +332,30 @@ void ReadStat() {
 void button_cahnge_stat(){
     if(d1button != "non"){
       if (digitalRead(output1) == LOW) {
-        Firebase.RTDB.setString(&fbdo_D1, STAT1, "1");
+        Firebase.RTDB.setString(&fbdo_D1, STAT1, OnNum);
         d1button = "non";
       } else if (digitalRead(output1) == HIGH) {
-        Firebase.RTDB.setString(&fbdo_D1, STAT1, "0");
+        Firebase.RTDB.setString(&fbdo_D1, STAT1, CloseNum);
         d1button = "non";
       }
     }
     delay(100);
     if(d2button != "non"){
       if (digitalRead(output2) == LOW) {
-        Firebase.RTDB.setString(&fbdo_D2, STAT2, "1");
+        Firebase.RTDB.setString(&fbdo_D2, STAT2, OnNum);
         d2button = "non";
       } else if (digitalRead(output2) == HIGH) {
-        Firebase.RTDB.setString(&fbdo_D2, STAT2, "0");
+        Firebase.RTDB.setString(&fbdo_D2, STAT2, CloseNum);
         d2button = "non";
       }
     }
     delay(100);
     if(d3button != "non"){
       if (digitalRead(output3) == LOW) {
-        Firebase.RTDB.setString(&fbdo_D3, STAT3, "1");
+        Firebase.RTDB.setString(&fbdo_D3, STAT3, OnNum);
         d3button = "non";
       } else if (digitalRead(output3) == HIGH) {
-        Firebase.RTDB.setString(&fbdo_D3, STAT3, "0");
+        Firebase.RTDB.setString(&fbdo_D3, STAT3, CloseNum);
         d3button = "non";
       }
     }
@@ -336,6 +363,8 @@ void button_cahnge_stat(){
 }
 void Task1code( void * pvParameters ){
   for(;;){
+    WEB();
+
     if (digitalRead(SW1) == LOW) {
       if (digitalRead(output1) == LOW) {
         digitalWrite(output1, HIGH);
