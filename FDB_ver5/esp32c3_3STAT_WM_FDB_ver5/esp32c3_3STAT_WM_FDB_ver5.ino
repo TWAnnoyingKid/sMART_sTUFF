@@ -160,25 +160,25 @@ void loop() {
 void time() {
   timeClient.update();
   String nowTime = a + timeClient.getHours() + ":" + timeClient.getMinutes() + a;
-  if (timeClient.getMinutes() == 15 || timeClient.getMinutes() == 30 || timeClient.getMinutes() == 45 || timeClient.getMinutes() == 0){
-    if (timeClient.getSeconds() < 10 & timeClient.getSeconds() > 7) {
+  if (timeClient.getMinutes() == 5 || timeClient.getMinutes() == 10 || timeClient.getMinutes() == 15 || timeClient.getMinutes() == 20 || timeClient.getMinutes() == 25 || timeClient.getMinutes() == 30 || timeClient.getMinutes() == 35 || timeClient.getMinutes() == 40 || timeClient.getMinutes() == 45 || timeClient.getMinutes() == 50 || timeClient.getMinutes() == 55 || timeClient.getMinutes() == 0){
+    if (timeClient.getSeconds() < 39 & timeClient.getSeconds() > 42) {
       Firebase.RTDB.setString(&fbdo_D4, CNSTAT, "1");
     }
-    if (timeClient.getSeconds() < 14 & timeClient.getSeconds() > 11) {
+    if (timeClient.getSeconds() < 33 & timeClient.getSeconds() > 30) {
       if (digitalRead(output1) == LOW) {
         Firebase.RTDB.setString(&fbdo_D1, STAT1, OnNum);
       } else if (digitalRead(output1) == HIGH) {
         Firebase.RTDB.setString(&fbdo_D1, STAT1, CloseNum);
       }
     }
-    if (timeClient.getSeconds() < 18 & timeClient.getSeconds() > 15) {
+    if (timeClient.getSeconds() < 37 & timeClient.getSeconds() > 34) {
       if (digitalRead(output2) == LOW) {
         Firebase.RTDB.setString(&fbdo_D2, STAT2, OnNum);
       } else if (digitalRead(output2) == HIGH) {
         Firebase.RTDB.setString(&fbdo_D2, STAT2, CloseNum);
       }
     }
-    if (timeClient.getSeconds() < 21 & timeClient.getSeconds() > 19) {
+    if (timeClient.getSeconds() < 41 & timeClient.getSeconds() > 38) {
       if (digitalRead(output3) == LOW) {
         Firebase.RTDB.setString(&fbdo_D3, STAT3, OnNum);
       } else if (digitalRead(output3) == HIGH) {
