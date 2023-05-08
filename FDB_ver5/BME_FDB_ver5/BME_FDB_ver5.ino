@@ -110,6 +110,7 @@ void loop(){
 
   if (Firebase.isTokenExpired()){
     Firebase.refreshToken(&config);
+    Firebase.RTDB.setString(&fbdo_D4, CNSTAT, "1");
     Serial.println("Refresh token");
   }
 
@@ -203,11 +204,6 @@ void call(){
 }
 void time() {
   timeClient.update();
-  if (timeClient.getMinutes() == 15 || timeClient.getMinutes() == 30 || timeClient.getMinutes() == 45 || timeClient.getMinutes() == 0){
-    if (timeClient.getSeconds() < 10 & timeClient.getSeconds() > 7) {
-      Firebase.RTDB.setString(&fbdo_D4, CNSTAT, "1");
-    }
-  }
   if (timeClient.getSeconds() == 0 || timeClient.getSeconds() == 15 || timeClient.getSeconds() == 30 || timeClient.getSeconds() == 45) {
     Firebase.RTDB.setFloat(&fbdo, STAT1, bme.readTemperature());
     Firebase.RTDB.setFloat(&fbdo, STAT2, bme.readHumidity());
