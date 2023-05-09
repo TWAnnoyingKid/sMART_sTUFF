@@ -1,7 +1,7 @@
 // https://www.grc.com/fingerprints.htm
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
+#include <WiFi.h>
+#include <WebServer.h>
 #include <WiFiManager.h> 
 #include <NTPClient.h>
 #include <WiFiUdp.h>
@@ -30,6 +30,8 @@ unsigned long previousTime = 0;
 const long timeoutTime = 2000;
 #define DATABASE_URL "https://esp8266-ai2-default-rtdb.firebaseio.com"
 #define API_KEY "AIzaSyAF4OdtYUAomk_4WnvE5MXb_nphlQ33UyA" 
+#define USER_EMAIL "smart.stuff.18340@gmail.com"
+#define USER_PASSWORD "Rayed18340"
 FirebaseData fbdo, fbdo_D1, fbdo_D4;
 FirebaseAuth auth;
 FirebaseConfig config;
@@ -71,6 +73,8 @@ void setup() {
   
   config.api_key = API_KEY;
   config.database_url = DATABASE_URL;
+  auth.user.email = USER_EMAIL;
+  auth.user.password = USER_PASSWORD;
   if (Firebase.signUp(&config, &auth, "", "")){
     Serial.println("ok");
     signupOK = true;

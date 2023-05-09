@@ -9,7 +9,7 @@
 #include "addons/TokenHelper.h"
 #include "addons/RTDBHelper.h"
 
-String ele = "3stat";
+String ele = "1stat";
 TaskHandle_t Task1;
 TaskHandle_t Task2;
 
@@ -41,7 +41,7 @@ const long timeoutTime = 2000;
 #define API_KEY "AIzaSyAF4OdtYUAomk_4WnvE5MXb_nphlQ33UyA"
 #define USER_EMAIL "smart.stuff.18340@gmail.com"
 #define USER_PASSWORD "Rayed18340"
-FirebaseData fbdo, fbdo_D1, fbdo_D2, fbdo_D3, fbdo_D4;
+FirebaseData fbdo, fbdo_D1,  fbdo_D4;
 FirebaseAuth auth;
 FirebaseConfig config;
 unsigned long sendDataPrevMillis = 0;
@@ -52,8 +52,6 @@ String A = WiFi.macAddress();
 String a = "\\\"";
 String IP = "";
 String STAT1 = A + "/D1";
-String STAT2 = A + "/D2";
-String STAT3 = A + "/D3";
 String CNSTAT = A + "/esp";
 
 String OnNum = "1";
@@ -63,15 +61,11 @@ void setup() {
   Serial.begin(115200);
 
   pinMode(output1, OUTPUT);    digitalWrite(output1, LOW);
-  pinMode(output2, OUTPUT);    digitalWrite(output2, LOW);
-  pinMode(output3, OUTPUT);    digitalWrite(output3, LOW);
   
   pinMode(LED_PIN, OUTPUT);    digitalWrite(LED_PIN, HIGH);
   pinMode(rs, INPUT_PULLUP);   digitalWrite(rs, HIGH);
   
   pinMode(SW1, INPUT_PULLUP);  digitalWrite(SW1, HIGH);
-  pinMode(SW2, INPUT_PULLUP);  digitalWrite(SW2, HIGH);
-  pinMode(SW3, INPUT_PULLUP);  digitalWrite(SW3, HIGH);
 
   xTaskCreatePinnedToCore(
                     Task1code, 
@@ -114,21 +108,11 @@ void setup() {
     Serial.print ("D1 begin error ");
     Serial.println(fbdo_D1.errorReason());
   }
-  if (!Firebase.RTDB.beginStream(&fbdo_D2, STAT2)) {
-    Serial.print ("D2 begin error ");
-    Serial.println(fbdo_D2.errorReason());
-  }
-  if (!Firebase.RTDB.beginStream(&fbdo_D3, STAT3)) {
-    Serial.print ("D3 begin error ");
-    Serial.println(fbdo_D3.errorReason());
-  }
   if (!Firebase.RTDB.beginStream(&fbdo_D4, CNSTAT)) {
     Serial.print ("CN begin error ");
     Serial.println(fbdo_D4.errorReason());
   }
   Firebase.RTDB.setString(&fbdo_D1, STAT1, OnNum);
-  Firebase.RTDB.setString(&fbdo_D2, STAT2, OnNum);
-  Firebase.RTDB.setString(&fbdo_D3, STAT3, OnNum);
   Firebase.RTDB.setString(&fbdo_D4, CNSTAT, "0");
 
   Serial.println("ALL DONE");
@@ -162,26 +146,6 @@ void time() {
         Firebase.RTDB.setString(&fbdo_D1, STAT1, CloseNum);
       }
     }
-    if (Firebase.RTDB.getString(&fbdo, A + "/OT/D2")) {
-      if (fbdo.stringData() == nowTime) {
-        Firebase.RTDB.setString(&fbdo_D2, STAT2, OnNum);
-      }
-    }
-    if (Firebase.RTDB.getString(&fbdo, A + "/CT/D2")) {
-      if (fbdo.stringData() == nowTime) {
-        Firebase.RTDB.setString(&fbdo_D2, STAT2, CloseNum);
-      }
-    }
-    if (Firebase.RTDB.getString(&fbdo, A + "/OT/D3")) {
-      if (fbdo.stringData() == nowTime) {
-        Firebase.RTDB.setString(&fbdo_D3, STAT3, OnNum);
-      }
-    }
-    if (Firebase.RTDB.getString(&fbdo, A + "/CT/D3")) {
-      if (fbdo.stringData() == nowTime) {
-        Firebase.RTDB.setString(&fbdo_D3, STAT3, CloseNum);
-      }
-    }
   }
 }
 void WEB() {
@@ -213,7 +177,7 @@ void WEB() {
             client.println("</head><body>");
             client.println("<h1>MAC=" + A + "</h1>");
             client.println("<h2>ELEMENT=" + ele + "</h2>");
-            client.println("<h3>裝置名稱 = sMART sTUFF 三插座智慧延長線</h3>");
+            client.println("<h3>裝置名稱 = sMART sTUFF 智慧插座</h3>");
             client.println("<h4>IP=" + IP + "</h4>");
             client.println("</body></html>");
             client.println();
@@ -248,34 +212,6 @@ void ReadStat() {
       }
     }
 
-    if (!Firebase.RTDB.readStream(&fbdo_D2)) {
-      Serial.print("D2 read error：");
-      Serial.println(fbdo_D2.errorReason());
-    }
-    if (fbdo_D2.streamAvailable()) {
-      if (fbdo_D2.stringData() == CloseNum) {
-        digitalWrite(output2, HIGH);
-        Serial.println("D2 OFF");
-      } else if (fbdo_D2.stringData() == OnNum) {
-        digitalWrite(output2, LOW);
-        Serial.println("D2 ON");
-      }
-    }
-
-    if (!Firebase.RTDB.readStream(&fbdo_D3)) {
-      Serial.print("D3 read error：");
-      Serial.println(fbdo_D3.errorReason());
-    }
-    if (fbdo_D3.streamAvailable()) {
-      if (fbdo_D3.stringData() == CloseNum) {
-        digitalWrite(output3, HIGH);
-        Serial.println("D3 OFF");
-      } else if (fbdo_D3.stringData() == OnNum) {
-        digitalWrite(output3, LOW);
-        Serial.println("D3 ON");
-      }
-    }
-
     if (!Firebase.RTDB.readStream(&fbdo_D4)) {
       Serial.print("cn read error：");
       Serial.println(fbdo_D4.errorReason());
@@ -298,31 +234,10 @@ void button_cahnge_stat(){
       }
     }
     delay(100);
-    if(d2button != "non"){
-      if (digitalRead(output2) == LOW) {
-        Firebase.RTDB.setString(&fbdo_D2, STAT2, OnNum);
-        d2button = "non";
-      } else if (digitalRead(output2) == HIGH) {
-        Firebase.RTDB.setString(&fbdo_D2, STAT2, CloseNum);
-        d2button = "non";
-      }
-    }
-    delay(100);
-    if(d3button != "non"){
-      if (digitalRead(output3) == LOW) {
-        Firebase.RTDB.setString(&fbdo_D3, STAT3, OnNum);
-        d3button = "non";
-      } else if (digitalRead(output3) == HIGH) {
-        Firebase.RTDB.setString(&fbdo_D3, STAT3, CloseNum);
-        d3button = "non";
-      }
-    }
-    delay(100);
 }
 void Task1code( void * pvParameters ){
   for(;;){
     WEB();
-
     if (digitalRead(SW1) == LOW) {
       if (digitalRead(output1) == LOW) {
         digitalWrite(output1, HIGH);
@@ -330,26 +245,6 @@ void Task1code( void * pvParameters ){
       } else if (digitalRead(output1) == HIGH) {
         digitalWrite(output1, LOW);
         d1button = "true";
-      }
-    }
-    delay(100);
-    if (digitalRead(SW2) == LOW) {
-      if (digitalRead(output2) == LOW) {
-        digitalWrite(output2, HIGH);
-        d2button = "true";
-      } else if (digitalRead(output2) == HIGH) {
-        digitalWrite(output2, LOW);
-        d2button = "true";
-      }
-    }
-    delay(100);
-    if (digitalRead(SW3) == LOW) {
-      if (digitalRead(output3) == LOW) {
-        digitalWrite(output3, HIGH);
-        d3button = "true";
-      } else if (digitalRead(output3) == HIGH) {
-        digitalWrite(output3, LOW);
-        d3button = "true";
       }
     }
     delay(100);
