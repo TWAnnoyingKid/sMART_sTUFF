@@ -139,6 +139,25 @@ void setup() {
   Firebase.RTDB.setString(&fbdo_ALL, STAT3, OnNum);
   Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "0");
 
+  if (Firebase.RTDB.getString(&fbdo_OT, A + "/OT/D1")) {
+    D1_TO = fbdo.stringData();
+  }
+  if (Firebase.RTDB.getString(&fbdo_OT, A + "/OT/D2")) {
+    D2_TO = fbdo.stringData();
+  }
+  if (Firebase.RTDB.getString(&fbdo_OT, A + "/OT/D3")) {
+    D3_TO = fbdo.stringData();
+  }
+  if (Firebase.RTDB.getString(&fbdo_CT, A + "/CT/D1")) {
+    D1_TC = fbdo.stringData();
+  }
+  if (Firebase.RTDB.getString(&fbdo_CT, A + "/CT/D2")) {
+    D2_TC = fbdo.stringData();
+  }
+  if (Firebase.RTDB.getString(&fbdo_CT, A + "/CT/D3")) {
+    D3_TC = fbdo.stringData();
+  }
+
   Serial.println("ALL DONE");
   server.begin();
   
