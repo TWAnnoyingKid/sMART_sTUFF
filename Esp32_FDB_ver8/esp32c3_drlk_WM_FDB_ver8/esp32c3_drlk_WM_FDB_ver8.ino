@@ -9,6 +9,12 @@
 #include "addons/TokenHelper.h"
 #include "addons/RTDBHelper.h"
 String ele = "drlk";
+WiFiServer server(80);
+
+String header;
+
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "time.stdtime.gov.tw");
 
 #define ROW_NUM     4  // four rows
 #define COLUMN_NUM  4  // four columns
@@ -28,6 +34,7 @@ unsigned long sendDataPrevMillis = 0;
 int count = 0;
 bool signupOK = false;
 int output1 = 1;
+int rs = 4;
 int LED_PIN = 5;
 char keys[ROW_NUM][COLUMN_NUM] = {
   {'1', '2', '3', 'A'},
@@ -39,10 +46,9 @@ byte pin_rows[ROW_NUM] = {19, 18, 5, 17};
 byte pin_column[COLUMN_NUM] = {16, 4, 0, 2}; 
 Keypad keypad = Keypad( makeKeymap(keys), pin_rows, pin_column, ROW_NUM, COLUMN_NUM );
 
-const String password_1 = ""; 
-const String password_2 = "";  
-const String password_temp = ""; 
-int temp_time;
+String password_1 = ""; 
+String password_temp = ""; 
+String temp_time = "";
 String input_password;
 
 String A = WiFi.macAddress();
@@ -119,7 +125,7 @@ void door_open(){
     if (key == '*') {
       input_password = ""; // reset the input password
     } else if (key == '#') {
-      if (input_password == password_1 || input_password == password_2 || input_password == password_temp) {
+      if (input_password == password_1 || input_password == password_temp) {
         Serial.println("Valid Password => unlock the door");
         digitalWrite(output1, LOW);  // unlock the door for 20 seconds
         delay(20000);
@@ -213,12 +219,6 @@ void ReadStat(){
           Serial.println("password_1 now is " + password_1);
         } 
       }
-      if (fbdo_Password.dataPath() == "/PW2"){
-        if(fbdo_Password.dataType() == "string"){
-          password_2 = fbdo_Password.stringData();
-          Serial.println("password_2 now is " + password_2);
-        } 
-      }
       if (fbdo_Password.dataPath() == "/PWTemp"){
         if(fbdo_Password.dataType() == "string"){
           password_temp = fbdo_Password.stringData();
@@ -237,19 +237,23 @@ void time(){
   timeClient.update();
   if (timeClient.getSeconds() > 0 & timeClient.getSeconds() < 3) {
     if(temp_time != ""){
-    int g = timeClient.getMinutes() - temp_time;
-    if(g > 0){
-      if(g = 3){
-        Serial.println("Temp Password fail");
-        Firebase.RTDB.setString(&fbdo_ALL, A + "/Password/PWTemp", "");
+      int g = timeClient.getMinutes() - temp_time.toInt();
+      if(g > 0){
+        if(g = 3){ 
+          Serial.println("Temp Password fail");
+          Firebase.RTDB.setString(&fbdo_ALL, A + "/Password/PWTemp", "");
+          temp_time = "";
+          password_temp = "";
+        }
+      }
+      else if(g < 0){
+        if(g = (-57)){
+          Serial.println("Temp Password fail");
+          Firebase.RTDB.setString(&fbdo_ALL, A + "/Password/PWTemp", "");
+          temp_time = "";
+          password_temp = "";
+        }
       }
     }
-    else if(g < 0){
-      if(g = (-57)){
-        Serial.println("Temp Password fail");
-        Firebase.RTDB.setString(&fbdo_ALL, A + "/Password/PWTemp", "");
-      }
-    }
-  }
   }
 }
