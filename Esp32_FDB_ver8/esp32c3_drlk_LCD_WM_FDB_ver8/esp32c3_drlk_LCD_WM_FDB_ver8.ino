@@ -29,7 +29,7 @@ const long timeoutTime = 2000;
 #define API_KEY "AIzaSyAF4OdtYUAomk_4WnvE5MXb_nphlQ33UyA"
 #define USER_EMAIL "smart.stuff.18340@gmail.com"
 #define USER_PASSWORD "Rayed18340"
-FirebaseData fbdo, fbdo_ALL, fbdo_Password, fbdo_OT;
+FirebaseData fbdo, fbdo_ALL, fbdo_Password;
 FirebaseAuth auth;
 FirebaseConfig config;
 unsigned long sendDataPrevMillis = 0;
@@ -120,7 +120,6 @@ void setup() {
     Serial.print ("Password begin error ");
     Serial.println(fbdo_ALL.errorReason());
   }  
-  
   Firebase.RTDB.setString(&fbdo_ALL, STAT1, CloseNum);
   Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "0");
   Firebase.RTDB.setString(&fbdo_Password, A + "/Password/PWTemp", "0");
@@ -142,6 +141,12 @@ void loop() {
   WEB();
   ReadStat();
   time();
+
+  if (Firebase.isTokenExpired()){
+    Firebase.refreshToken(&config);
+    Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "1");
+    Serial.println("Refresh token");
+  }
 }
 void door_open(){
   char key = keypad.getKey();
@@ -249,9 +254,11 @@ void ReadStat(){
         }
       }
       if (fbdo_ALL.dataPath() == "/esp"){
-        if (fbdo_ALL.stringData() == "1") {
-          Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "2");
-        } 
+        if(fbdo_ALL.dataType() == "string"){
+          if (fbdo_ALL.stringData() = "1") {
+            Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "2");
+          }
+        }
       }
     }
 

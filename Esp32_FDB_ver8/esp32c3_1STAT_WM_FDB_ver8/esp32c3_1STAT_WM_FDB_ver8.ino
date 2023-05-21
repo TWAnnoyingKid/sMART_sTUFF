@@ -199,10 +199,12 @@ void ReadStat() {
           Serial.println("D1 ON");
         }
       }
-      else if (fbdo_ALL.dataPath() == "/esp"){
-        if (fbdo_ALL.stringData() == "1") {
-          Firebase.RTDB.setString(&fbdo, CNSTAT, "2");
-        } 
+      if (fbdo_ALL.dataPath() == "/esp"){
+        if(fbdo_ALL.dataType() == "string"){
+          if (fbdo_ALL.stringData() = "1") {
+            Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "2");
+          }
+        }
       }
     }
 //////////////////////////////////////////////////////////////////

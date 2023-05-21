@@ -124,6 +124,12 @@ void loop() {
   WEB();
   ReadStat();
   time();
+
+  if (Firebase.isTokenExpired()){
+    Firebase.refreshToken(&config);
+    Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "1");
+    Serial.println("Refresh token");
+  }
 }
 void door_open(){
   char key = keypad.getKey();
@@ -215,9 +221,11 @@ void ReadStat(){
         }
       }
       if (fbdo_ALL.dataPath() == "/esp"){
-        if (fbdo_ALL.stringData() == "1") {
-          Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "2");
-        } 
+        if(fbdo_ALL.dataType() == "string"){
+          if (fbdo_ALL.stringData() = "1") {
+            Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "2");
+          }
+        }
       }
     }
 
