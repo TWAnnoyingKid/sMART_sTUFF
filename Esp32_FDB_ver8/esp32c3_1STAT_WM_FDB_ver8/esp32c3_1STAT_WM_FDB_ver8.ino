@@ -20,10 +20,10 @@ String header;
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "time.stdtime.gov.tw");
 
-int output1 = 10;
-int LED_PIN = 5;
-int SW1 = 1;
-int rs = 4;
+int output1 = 3;
+int LED_PIN = 4;
+int SW1 = 5;
+int rs = 2;
 
 String d1button = "non";
 String D1_TC_TRI = "non";
@@ -199,7 +199,7 @@ void ReadStat() {
           Serial.println("D1 ON");
         }
       }
-      if (fbdo_ALL.dataPath() == "/esp"){
+      else if (fbdo_ALL.dataPath() == "/esp"){
         if (fbdo_ALL.stringData() == "1") {
           Firebase.RTDB.setString(&fbdo, CNSTAT, "2");
         } 

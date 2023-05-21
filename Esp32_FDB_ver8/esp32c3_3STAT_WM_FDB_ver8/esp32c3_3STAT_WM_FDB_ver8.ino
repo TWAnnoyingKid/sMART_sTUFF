@@ -123,7 +123,7 @@ void setup() {
   Firebase.reconnectWiFi(true);
 
   if (!Firebase.RTDB.beginStream(&fbdo_ALL, A)) {
-    Serial.print ("D1 begin error ");
+    Serial.print ("ALL begin error ");
     Serial.println(fbdo_ALL.errorReason());
   }
   if (!Firebase.RTDB.beginStream(&fbdo_CT, A+"/CT")) {
@@ -134,6 +134,7 @@ void setup() {
     Serial.print ("OT begin error ");
     Serial.println(fbdo_OT.errorReason());
   }
+  
   Firebase.RTDB.setString(&fbdo_ALL, STAT1, OnNum);
   Firebase.RTDB.setString(&fbdo_ALL, STAT2, OnNum);
   Firebase.RTDB.setString(&fbdo_ALL, STAT3, OnNum);

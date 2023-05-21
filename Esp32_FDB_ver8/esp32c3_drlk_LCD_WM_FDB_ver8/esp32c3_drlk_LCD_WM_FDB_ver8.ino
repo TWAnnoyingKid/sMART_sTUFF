@@ -1,4 +1,6 @@
 #include <Keypad.h>
+#include <LiquidCrystal_I2C.h> 
+#include <Wire.h> 
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WebServer.h>
@@ -16,8 +18,8 @@ String header;
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "time.stdtime.gov.tw");
 
-#define ROW_NUM     4  // four rows
-#define COLUMN_NUM  4  // four columns
+#define ROW_NUM     4 
+#define COLUMN_NUM  4  
 
 unsigned long currentTime = millis();
 unsigned long previousTime = 0;
@@ -47,6 +49,7 @@ char keys[ROW_NUM][COLUMN_NUM] = {
 byte pin_rows[ROW_NUM] = {19, 18, 5, 17};  
 byte pin_column[COLUMN_NUM] = {16, 4, 0, 2};  
 Keypad keypad = Keypad( makeKeymap(keys), pin_rows, pin_column, ROW_NUM, COLUMN_NUM );
+LiquidCrystal_I2C lcd(0x27,16,2);  // SDA to GPIO21 || SCL to GPIO22
 
 String password_1 = ""; 
 String password_temp = ""; 
@@ -64,10 +67,17 @@ String CloseNum = "0";
 
 void setup() {
   Serial.begin(115200);
-  input_password.reserve(17); 
+  input_password.reserve(12); 
   pinMode(output1, OUTPUT);   digitalWrite(output1, HIGH);
   pinMode(LED_PIN, OUTPUT);   digitalWrite(LED_PIN, HIGH);
   pinMode(rs, INPUT_PULLUP);  digitalWrite(rs, HIGH);
+  lcd.begin();
+  lcd.backlight();
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("sETTING...");
+  lcd.setCursor(0,1);
+  lcd.print("WIFI");
 
   WiFiManager wifiManager;
   // wifiManager.resetSettings();
@@ -76,6 +86,11 @@ void setup() {
   }
   digitalWrite(LED_PIN, LOW);
   wifiManager.autoConnect("sMART sTUFF");
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("sETTING...");
+  lcd.setCursor(0,1);
+  lcd.print("OTHER sTUFFs");
 
   A = WiFi.macAddress();
   IP = WiFi.localIP().toString();
@@ -115,8 +130,11 @@ void setup() {
   }
   Serial.println("ALL DONE");
   server.begin();
-
-
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("DONE!!! ");
+  delay(1000 * 2);
+  lcd.clear();
 }
 
 void loop() {
@@ -132,23 +150,39 @@ void door_open(){
     Serial.print(key);
 
     if (key == '*') {
-      input_password = ""; 
+      input_password = "";
       Serial.println(" ");
       Serial.println("Reset Input");
+      lcd.clear();
     } 
     else if (key == '#') {
+      lcd.clear();
       if (a + input_password + a == password_1 || input_password == password_temp) {
         Serial.println(" ");
         Serial.println("Valid Password => unlock the door");
+        lcd.setCursor(0, 0);
+        lcd.print("CORRECT!");
+        lcd.setCursor(0, 1);
+        lcd.print("DOOR UNLOCKED!");
       } 
       else {
         Serial.println(" ");
         Serial.println("Invalid Password => Try again");
+        lcd.setCursor(0, 0);
+        lcd.print("INCORRECT!");
+        lcd.setCursor(0, 1);
+        lcd.print("ACCESS DENIED!");
       }
       input_password = ""; 
     } 
     else {
+      if (input_password.length() == 0) {
+        lcd.clear();
+      }
+
       input_password += key; 
+      lcd.setCursor(input_password.length(), 0); 
+      lcd.print('*');                 
     }
   }
 }
