@@ -126,14 +126,6 @@ void setup() {
     Serial.print ("ALL begin error ");
     Serial.println(fbdo_ALL.errorReason());
   }
-  if (!Firebase.RTDB.beginStream(&fbdo_CT, A+"/CT")) {
-    Serial.print ("CT begin error ");
-    Serial.println(fbdo_CT.errorReason());
-  }
-  if (!Firebase.RTDB.beginStream(&fbdo_OT, A+"/OT")) {
-    Serial.print ("OT begin error ");
-    Serial.println(fbdo_OT.errorReason());
-  }
   
   Firebase.RTDB.setString(&fbdo_ALL, STAT1, OnNum);
   Firebase.RTDB.setString(&fbdo_ALL, STAT2, OnNum);
@@ -222,7 +214,6 @@ void WEB() {
 }
 
 void ReadStat() {
-
   if (Firebase.ready() && signupOK) {
     if (!Firebase.RTDB.readStream(&fbdo_ALL)) {
       Serial.print("D1 read error：");
@@ -263,54 +254,42 @@ void ReadStat() {
           }
         }
       }
-    }
-//////////////////////////////////////////////////////////////////
-    if (!Firebase.RTDB.readStream(&fbdo_CT)) {
-      Serial.print("CT read error：");
-      Serial.println(fbdo_CT.errorReason());
-    }
-    if (fbdo_CT.streamAvailable()) {
-      if (fbdo_CT.dataPath() == "/D1"){
-        if(fbdo_CT.dataType() == "string"){
+      ///////////////////////////////////////////////////////////
+      if (fbdo_ALL.dataPath() == "/OT/D1"){
+        if(fbdo_ALL.dataType() == "string"){
+          D1_TO = fbdo_ALL.stringData();
+          Serial.println("D1_TO now is " + D1_TO);
+        } 
+      }
+      if (fbdo_ALL.dataPath() == "/OT/D2"){
+        if(fbdo_ALL.dataType() == "string"){
+          D2_TO = fbdo_ALL.stringData();
+          Serial.println("D2_TO now is " + D2_TO);
+        } 
+      }
+      if (fbdo_ALL.dataPath() == "/OT/D3"){
+        if(fbdo_ALL.dataType() == "string"){
+          D3_TO = fbdo_ALL.stringData();
+          Serial.println("D3_TO now is " + D3_TO);
+        } 
+      }
+    ///////////////////////////////////////////////////////////
+      if (fbdo_ALL.dataPath() == "/CT/D1"){
+        if(fbdo_ALL.dataType() == "string"){
           D1_TC = fbdo_CT.stringData();
           Serial.println("D1_TC now is " + D1_TC);
         } 
       }
-      if (fbdo_CT.dataPath() == "/D2"){
-        if(fbdo_CT.dataType() == "string"){
-          D2_TC = fbdo_CT.stringData();
+      if (fbdo_ALL.dataPath() == "/CT/D2"){
+        if(fbdo_ALL.dataType() == "string"){
+          D2_TC = fbdo_ALL.stringData();
           Serial.println("D2_TC now is " + D2_TC);
         } 
       }
-      if (fbdo_CT.dataPath() == "/D3"){
-        if(fbdo_CT.dataType() == "string"){
-          D3_TC = fbdo_CT.stringData();
+      if (fbdo_ALL.dataPath() == "/CT/D3"){
+        if(fbdo_ALL.dataType() == "string"){
+          D3_TC = fbdo_ALL.stringData();
           Serial.println("D3_TC now is " + D3_TC);
-        } 
-      }
-    }
-//////////////////////////////////////////////////////////////////
-    if (!Firebase.RTDB.readStream(&fbdo_OT)) {
-      Serial.print("OT read error：");
-      Serial.println(fbdo_OT.errorReason());
-    }
-    if (fbdo_OT.streamAvailable()) {
-      if (fbdo_OT.dataPath() == "/D1"){
-        if(fbdo_OT.dataType() == "string"){
-          D1_TO = fbdo_OT.stringData();
-          Serial.println("D1_TO now is " + D1_TO);
-        } 
-      }
-      if (fbdo_OT.dataPath() == "/D2"){
-        if(fbdo_OT.dataType() == "string"){
-          D2_TO = fbdo_OT.stringData();
-          Serial.println("D2_TO now is " + D2_TO);
-        } 
-      }
-      if (fbdo_OT.dataPath() == "/D3"){
-        if(fbdo_OT.dataType() == "string"){
-          D3_TO = fbdo_OT.stringData();
-          Serial.println("D3_TO now is " + D3_TO);
         } 
       }
     }

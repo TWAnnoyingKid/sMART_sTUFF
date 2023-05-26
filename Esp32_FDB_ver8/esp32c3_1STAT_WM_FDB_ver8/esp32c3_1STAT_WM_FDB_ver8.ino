@@ -20,10 +20,10 @@ String header;
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "time.stdtime.gov.tw");
 
-int output1 = 3;
-int LED_PIN = 4;
-int SW1 = 5;
-int rs = 2;
+const int output1 = D10;
+const int LED_PIN = D9;
+const int SW1 = D8;
+const int rs = D7;
 
 String d1button = "non";
 String D1_TC_TRI = "non";
@@ -59,16 +59,15 @@ void setup() {
   Serial.begin(115200);
 
   pinMode(output1, OUTPUT);    digitalWrite(output1, LOW);
-  
   pinMode(LED_PIN, OUTPUT);    digitalWrite(LED_PIN, HIGH);
   pinMode(rs, INPUT_PULLUP);   digitalWrite(rs, HIGH);
-  
   pinMode(SW1, INPUT_PULLUP);  digitalWrite(SW1, HIGH);
   
   WiFiManager wifiManager;
   // wifiManager.resetSettings();
   if (digitalRead(rs) == LOW) {
     wifiManager.resetSettings();
+    digitalWrite(LED_PIN, HIGH);
   }
   digitalWrite(LED_PIN, LOW);
   wifiManager.autoConnect("sMART sTUFF");
@@ -97,17 +96,14 @@ void setup() {
     Serial.print ("D1 begin error ");
     Serial.println(fbdo_ALL.errorReason());
   }
-  if (!Firebase.RTDB.beginStream(&fbdo_CT, A+"/CT")) {
-    Serial.print ("CT begin error ");
-    Serial.println(fbdo_CT.errorReason());
-  }
-  if (!Firebase.RTDB.beginStream(&fbdo_OT, A+"/OT")) {
-    Serial.print ("OT begin error ");
-    Serial.println(fbdo_OT.errorReason());
-  }
   Firebase.RTDB.setString(&fbdo_ALL, STAT1, OnNum);
   Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "0");
-
+  if (Firebase.RTDB.getString(&fbdo_OT, A + "/OT/D1")) {
+    D1_TO = fbdo.stringData();
+  }
+  if (Firebase.RTDB.getString(&fbdo_CT, A + "/CT/D1")) {
+    D1_TC = fbdo.stringData();
+  }
   Serial.println("ALL DONE");
   server.begin();
   
@@ -118,15 +114,14 @@ void loop() {
   time();
   ReadStat();
   if (digitalRead(SW1) == LOW) {
-      if (digitalRead(output1) == LOW) {
-        digitalWrite(output1, HIGH);
-        Firebase.RTDB.setString(&fbdo, STAT1, CloseNum);
-      } else if (digitalRead(output1) == HIGH) {
-        digitalWrite(output1, LOW);
-        Firebase.RTDB.setString(&fbdo, STAT1, OnNum);
-        d1button = "true";
-      }
+    if (digitalRead(output1) == LOW) {
+      digitalWrite(output1, HIGH);
+      Firebase.RTDB.setString(&fbdo, STAT1, CloseNum);
+    } else if (digitalRead(output1) == HIGH) {
+      digitalWrite(output1, LOW);
+      Firebase.RTDB.setString(&fbdo, STAT1, OnNum);
     }
+  }
   delay(100);
 
   if (Firebase.isTokenExpired()){
@@ -183,7 +178,6 @@ void WEB() {
 }
 
 void ReadStat() {
-
   if (Firebase.ready() && signupOK) {
     if (!Firebase.RTDB.readStream(&fbdo_ALL)) {
       Serial.print("D1 read error：");
@@ -199,38 +193,24 @@ void ReadStat() {
           Serial.println("D1 ON");
         }
       }
+      if (fbdo_ALL.dataPath() == "/CT/D1"){
+        if(fbdo_ALL.dataType() == "string"){
+          D1_TC = fbdo_ALL.stringData();
+          Serial.println("D1_TC now is " + D1_TC);
+        } 
+      }
+      if (fbdo_ALL.dataPath() == "/OT/D1"){
+        if(fbdo_ALL.dataType() == "string"){
+          D1_TO = fbdo_ALL.stringData();
+          Serial.println("D1_TO now is " + D1_TO);
+        } 
+      }
       if (fbdo_ALL.dataPath() == "/esp"){
         if(fbdo_ALL.dataType() == "string"){
           if (fbdo_ALL.stringData() == "1") {
             Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "2");
           }
         }
-      }
-    }
-//////////////////////////////////////////////////////////////////
-    if (!Firebase.RTDB.readStream(&fbdo_CT)) {
-      Serial.print("CT read error：");
-      Serial.println(fbdo_CT.errorReason());
-    }
-    if (fbdo_CT.streamAvailable()) {
-      if (fbdo_CT.dataPath() == "/D1"){
-        if(fbdo_CT.dataType() == "string"){
-          D1_TC = fbdo_CT.stringData();
-          Serial.println("D1_TC now is " + D1_TC);
-        } 
-      }
-    }
-//////////////////////////////////////////////////////////////////
-    if (!Firebase.RTDB.readStream(&fbdo_OT)) {
-      Serial.print("OT read error：");
-      Serial.println(fbdo_OT.errorReason());
-    }
-    if (fbdo_OT.streamAvailable()) {
-      if (fbdo_OT.dataPath() == "/D1"){
-        if(fbdo_OT.dataType() == "string"){
-          D1_TO = fbdo_OT.stringData();
-          Serial.println("D1_TO now is " + D1_TO);
-        } 
       }
     }
   }
