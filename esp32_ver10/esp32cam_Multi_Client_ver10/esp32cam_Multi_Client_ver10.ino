@@ -214,6 +214,7 @@ void mjpegCB(void* pvParameters) {
   //  Registering webserver handling routines
   server.on("/", HTTP_GET, handleJPGSstream);
   server.on("/info", handleINFO);
+  server.on("/jpg", HTTP_GET, handleJPG);
   server.onNotFound(handleNotFound);
 
   //  Starting webserver
@@ -445,10 +446,17 @@ const char JHEADER[] = "HTTP/1.1 200 OK\r\n" \
                        "Content-type: image/jpeg\r\n\r\n";
 const int jhdLen = strlen(JHEADER);
 
-//設定jpg單張影像服務
 void handleINFO(void)
 {
   server.send ( 200, "text/plain", "<h1>MAC=" + A + "</h1><h2>ELEMENT=" + ele + "</h2><h3>裝置名稱 = sMART sTUFF IPCAM</h3><h4>IP=" + IP + "</h4>" ); 
+}
+
+void handleJPG(void)
+{
+  WiFiClient client = server.client();
+  if (!client.connected()) return;
+  client.write(JHEADER, jhdLen);
+  client.write((char*)cam.getfb(), cam.getSize());
 }
 
 
