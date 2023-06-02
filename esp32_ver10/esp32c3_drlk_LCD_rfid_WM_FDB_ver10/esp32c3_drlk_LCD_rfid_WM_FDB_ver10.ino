@@ -43,6 +43,7 @@ int count = 0;
 bool signupOK = false;
 int close_gate = 16;
 int open_gate = 4;
+int D0 = 21;
 int rs = 2;
 int LED_PIN = 0;
 char keys[ROW_NUM][COLUMN_NUM] = {
@@ -62,6 +63,7 @@ String password_temp = "";
 String temp_time = "";
 String input_password;
 String open_time = "";
+String gate_stat="";
 
 String A = WiFi.macAddress();
 String a = "\\\"";
@@ -82,6 +84,13 @@ void setup() {
   pinMode(close_gate, OUTPUT); digitalWrite(close_gate, LOW);
   pinMode(LED_PIN, OUTPUT);    digitalWrite(LED_PIN, HIGH);
   pinMode(rs, INPUT_PULLUP);   digitalWrite(rs, HIGH);
+  pinMode(D0, INPUT); 
+  digitalWrite(open_gate, LOW);
+  digitalWrite(close_gate, HIGH);
+  delay(1500);
+  digitalWrite(open_gate, LOW);
+  digitalWrite(close_gate, LOW);
+  gate_stat="close";
   xTaskCreatePinnedToCore(
                     Task1code, 
                     "Task1",    
@@ -149,9 +158,7 @@ void setup() {
     Serial.println("password_1 now is " + password_1);
   }
   SPI.begin(); 
-  rfid.PCD_Init(); 
-  digitalWrite(open_gate, LOW);
-  digitalWrite(close_gate, HIGH);
+  rfid.PCD_Init();
   server.on("/info", handleINFO);
   server.onNotFound(handleNotFound);
   server.begin(); 
@@ -162,8 +169,8 @@ void setup() {
 
 void loop() {
   door_open();
+  sro4();
   rfid_scan();
-  WEB();
   ReadStat();
   time();
 
@@ -173,6 +180,30 @@ void loop() {
     Serial.println("Refresh token");
   }
 }
+void sro4(){
+  Serial.println(digitalRead(D0));
+  if (digitalRead(D0) == 0){
+    if(gate_stat == "close" ){
+      digitalWrite(open_gate, HIGH);
+      digitalWrite(close_gate, LOW);
+      delay(5*1000);
+      digitalWrite(open_gate, LOW);
+      digitalWrite(close_gate, HIGH);
+      // gate_stat="open";
+      // Firebase.RTDB.setString(&fbdo_ALL, STAT1, 0);
+      open_time_saving();
+    }
+    else if(gate_stat == "open" ){
+      digitalWrite(open_gate, LOW);
+      digitalWrite(close_gate, HIGH);
+      gate_stat="close";
+      Firebase.RTDB.setString(&fbdo_ALL, STAT1, 0);
+      open_time_saving();
+    }
+  }
+  delay(100);
+}
+
 void rfid_scan(){
   if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial()) {
     Serial.print(F("Card UID:"));
@@ -200,6 +231,7 @@ void dump_byte_array(byte *readCard, byte readCardSize) {
     Serial.println(" ");
     Serial.println("Invalid CARD => Try again");
     LED_OPEN = "CLOSE";
+    gate_stat="close";
     digitalWrite(open_gate, LOW);
     digitalWrite(close_gate, HIGH);
     open_time_saving();
@@ -210,6 +242,7 @@ void dump_byte_array(byte *readCard, byte readCardSize) {
       Serial.println(" ");
       Serial.println("Valid CARD => unlock the door");
       LED_OPEN = "OPEN";
+      gate_stat="open";
       digitalWrite(open_gate, HIGH);
       digitalWrite(close_gate, LOW);
       open_time_saving();
@@ -218,6 +251,7 @@ void dump_byte_array(byte *readCard, byte readCardSize) {
       Serial.println(" ");
       Serial.println("Invalid CARD => Try again");
       LED_OPEN = "CLOSE";
+      gate_stat="close";
       digitalWrite(open_gate, LOW);
       digitalWrite(close_gate, HIGH);
       open_time_saving();
@@ -243,6 +277,7 @@ void door_open(){
         Serial.println(" ");
         Serial.println("Valid Password => unlock the door");
         LED_OPEN = "OPEN";
+        gate_stat="open";
         digitalWrite(open_gate, HIGH);
         digitalWrite(close_gate, LOW);
         open_time_saving();
@@ -256,6 +291,7 @@ void door_open(){
         Serial.println(" ");
         Serial.println("Invalid Password => Try again");
         LED_OPEN = "CLOSE";
+        gate_stat="close";
         digitalWrite(open_gate, LOW);
         digitalWrite(close_gate, HIGH);
         open_time_saving();
@@ -297,12 +333,14 @@ void ReadStat(){
           digitalWrite(close_gate, HIGH);
           open_time_saving();
           LED_OPEN = "CLOSE";
+          gate_stat="close";
           Serial.println("Door Locked");
         } else if (fbdo_ALL.stringData() == OnNum) {
           digitalWrite(open_gate, HIGH);
           digitalWrite(close_gate, LOW);
           open_time_saving();
           LED_OPEN = "OPEN";
+          gate_stat="open";
           Serial.println("Door Opened");
         }
       }
@@ -364,7 +402,7 @@ void time(){
   if(open_time != ""){
     int opt = timeClient.getSeconds() - open_time.toInt();
     if(opt > 0){
-      if(opt == 1){
+      if(opt == 5){
         if(digitalRead(open_gate) == HIGH){
           digitalWrite(open_gate, LOW);
         }
@@ -376,7 +414,7 @@ void time(){
       }
     }
     else if(opt < 0){
-      if(opt == -59){
+      if(opt == -55){
         if(digitalRead(open_gate) == HIGH){
           digitalWrite(open_gate, LOW);
         }
@@ -413,6 +451,7 @@ void time(){
 void Task1code( void * pvParameters ){
   for(;;){
     server.handleClient();
+    // sro4();
     door_open();
     while (LED_SETTING == "ON"){
       digitalWrite(LED_PIN, HIGH);
