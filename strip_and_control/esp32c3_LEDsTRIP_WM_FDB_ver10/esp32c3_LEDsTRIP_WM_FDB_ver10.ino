@@ -19,16 +19,19 @@ TaskHandle_t Task2;
 WebServer server(80);
 
 String header;
-const int LED_PIN = D9;
-const int rs = D7;
+int rs = 1;
 
 unsigned long currentTime = millis();
 unsigned long previousTime = 0;
 const long timeoutTime = 2000;
 
-#define PIXEL_COUNT 16
-#define PIXEL_PIN    6
-Adafruit_NeoPixel strip(PIXEL_COUNT, PIXEL_PIN, NEO_GRB + NEO_KHZ800);
+#define LED_PIN    10
+#define LED_COUNT 16
+Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+int MinBrightness = 0;     
+int MaxBrightness = 255;  
+int fadeInWait = 10;     
+int fadeOutWait = 10; 
 
 #define DATABASE_URL "https://esp8266-ai2-default-rtdb.firebaseio.com"
 #define API_KEY "AIzaSyAF4OdtYUAomk_4WnvE5MXb_nphlQ33UyA"
@@ -41,6 +44,7 @@ unsigned long sendDataPrevMillis = 0;
 int count = 0;
 bool signupOK = false;
 
+
 String A = WiFi.macAddress();
 String a = "\\\"";
 String IP = "";
@@ -52,11 +56,10 @@ String CONTROLLER = A + "/CONTROLLER";
 String CONTROL = A + "/CONTROLBYCONTROLLER";
 String MODE = A + "/MODE";
 String CNSTAT = A + "/esp";
-int R= "";
-int G= "";
-int B= "";
-int base_color_set = 1;
-int mode_set = 1
+int R= 0;
+int G= 0;
+int B= 0;
+int mode_set = 1;
 
 void setup() {
   Serial.begin(115200);
@@ -99,9 +102,9 @@ void setup() {
     }
   }
   if (Firebase.RTDB.getString(&fbdo_ALL, COLOR)) {
-    R = fbdo_ALL.stringData().substring(1, 4).toInt();
-    G = fbdo_ALL.stringData().substring(4, 7).toInt();
-    B = fbdo_ALL.stringData().substring(7, 10).toInt();
+    R = fbdo_ALL.stringData().substring(0, 3).toInt();
+    G = fbdo_ALL.stringData().substring(3, 6).toInt();
+    B = fbdo_ALL.stringData().substring(6, 9).toInt();
   }
   if (controller_MAC != ""){
     if (!Firebase.RTDB.beginStream(&fbdo_control, controller_MAC)) {
@@ -110,6 +113,7 @@ void setup() {
     }
   }
   Firebase.RTDB.setString(&fbdo_ALL, CONTROL, "0");
+  Firebase.RTDB.setString(&fbdo_ALL, MODE, "1");
   Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "0");
 
   strip.begin(); 
@@ -125,14 +129,17 @@ void setup() {
 
 void loop() {
   server.handleClient();
-
-  if (controlby == "";){
+  if (controlby == ""){
     ReadStat();
   }
-  if ((controller_MAC !="") && (controlby == "trig";)){
+  if ((controller_MAC =="") && (controlby == "trig")){
+    Firebase.RTDB.setString(&fbdo_ALL, CONTROL, "0");
+  }
+  if ((controller_MAC !="") && (controlby == "trig")){
     controlbyMAC();
   }
-
+  color_change();
+  
   if (Firebase.isTokenExpired()){
     Firebase.refreshToken(&config);
     Firebase.RTDB.setString(&fbdo, CNSTAT, "1");
@@ -163,42 +170,14 @@ void ReadStat() {
 ////////////////////////////////////////////////////////////////
       if (fbdo_ALL.dataPath() == "/COLOR"){
         Serial.println(fbdo_ALL.stringData());
-        R = fbdo_ALL.stringData().substring(1, 4).toInt();
-        G = fbdo_ALL.stringData().substring(4, 7).toInt();
-        B = fbdo_ALL.stringData().substring(7, 10).toInt();
-        switch(mode_set){
-          case 1:  //恆亮
-            colorWipe(strip.Color(R, G, B), 10);
-            break;
-          case 2:  //呼吸
-            breath(strip.Color(R, G, B), 50);
-            break;
-          case 3:  //脈衝
-            theaterChase(strip.Color(R, G, B), 50);
-            break;
-        }
+        R = fbdo_ALL.stringData().substring(0, 3).toInt();
+        G = fbdo_ALL.stringData().substring(3, 6).toInt();
+        B = fbdo_ALL.stringData().substring(6, 9).toInt();
       }
 ////////////////////////////////////////////////////////////////
       if (fbdo_ALL.dataPath() == "/MODE"){
         Serial.println(fbdo_ALL.stringData());
         mode_set = fbdo_ALL.stringData().toInt();
-        switch(mode_set){
-          case 1:  //恆亮
-            colorWipe(strip.Color(R, G, B), 10);
-            break;
-          case 2:  //呼吸
-            breath(strip.Color(R, G, B), 50);
-            break;
-          case 3:  //脈衝
-            theaterChase(strip.Color(R, G, B), 50);
-            break;
-          case 4:  //彩虹
-            rainbow(10);
-            break;
-          case 5:  //彩虹跑馬燈
-            theaterChaseRainbow(50);
-            break;
-        }
       }
 ////////////////////////////////////////////////////////////////
       if (fbdo_ALL.dataPath() == "/CONTROLLER"){
@@ -210,10 +189,10 @@ void ReadStat() {
       if (fbdo_ALL.dataPath() == "/CONTROLBYCONTROLLER"){
         if (fbdo_ALL.stringData() == "1") {
           controlby = "trig";
-          if (!Firebase.RTDB.beginStream(&fbdo_control, controller_MAC)) {
-            Serial.print ("Control begin error ");
-            Serial.println(fbdo.errorReason());
-          }
+          // if (!Firebase.RTDB.beginStream(&fbdo_control, controller_MAC)) {
+          //   Serial.print ("Control begin error ");
+          //   Serial.println(fbdo.errorReason());
+          // }
         }
         else if (fbdo_ALL.stringData() == "0") {
           controlby = "";
@@ -222,6 +201,7 @@ void ReadStat() {
     }
   }
 }
+
 void controlbyMAC(){
   if (Firebase.ready() && signupOK) {
     if (!Firebase.RTDB.readStream(&fbdo_control)) {
@@ -231,6 +211,9 @@ void controlbyMAC(){
     if (fbdo_control.streamAvailable()) {
       if (fbdo_control.dataPath() == "/COLOR"){
         Serial.println(fbdo_control.stringData());
+        R = fbdo_control.stringData().substring(0, 3).toInt();
+        G = fbdo_control.stringData().substring(3, 6).toInt();
+        B = fbdo_control.stringData().substring(6, 9).toInt();
       }
       if (fbdo_control.dataPath() == "/MODE"){
         Serial.println(fbdo_control.stringData());
@@ -240,68 +223,135 @@ void controlbyMAC(){
   }
 }
 
-void colorWipe(uint32_t color, int wait) {
-  for(int i=0; i<strip.numPixels(); i++) { 
-    strip.setPixelColor(i, color);      
-    strip.show();                     
+void color_change(){
+  switch(mode_set){
+    case 1:  //單色恆亮
+      colorWipe(strip.Color(R, G, B), 5);
+      break;
+    case 2:  //單色呼吸
+      rgbBreathe(strip.Color(R, G, B), 250);
+      break;
+    case 3:  //單色跑馬燈
+      theaterChase(strip.Color(R, G, B), 50);
+      break;
+    case 4:  //彩虹
+      rainbow(10);
+      break;
+    case 5:  //彩虹呼吸燈
+      rainbowBreathe(250); 
+      break;
+    case 6:
+      close_led(strip.Color(R, G, B), 5);
+      break;
+  }  
+}
+
+void close_led(uint32_t color, int wait){
+  for(int i=0; i<strip.numPixels(); i++) {
+    strip.setBrightness(0);   
+    strip.show();         
+    delay(wait);            
   }
 }
 
-void breath(uint32_t color, int wait){
-  for(int i=0; i<strip.numPixels(); i++) { 
-    strip.setPixelColor(i, color);      
-    strip.show();                 
+void colorWipe(uint32_t color, int wait) {
+  for(int i=0; i<strip.numPixels(); i++) {
+    strip.setBrightness(255); 
+    strip.setPixelColor(i, color);   
+    strip.show();         
+    delay(wait);            
   }
-  int bri=0
-  for(bri=0; bri<255; bri++){
-    strip.setBrightness(bri);
-    delay(wait);
-  }
-  for(bri=255; bri>0; bri--){
-    strip.setBrightness(bri);
-    delay(wait);
-  }
-  delay(1000);
 }
 
 void theaterChase(uint32_t color, int wait) {
-  for(int a=0; a<10; a++) {  // Repeat 10 times...
-    for(int b=0; b<3; b++) { //  'b' counts from 0 to 2...
-      strip.clear();         //   Set all pixels in RAM to 0 (off)
-      // 'c' counts up from 'b' to end of strip in steps of 3...
+  strip.setBrightness(255); 
+  for(int a=0; a<5; a++) { 
+    for(int b=0; b<3; b++) { 
+      strip.clear();       
       for(int c=b; c<strip.numPixels(); c += 3) {
-        strip.setPixelColor(c, color); // Set pixel 'c' to value 'color'
+        strip.setPixelColor(c, color);
       }
-      strip.show(); // Update strip with new contents
-      delay(wait);  // Pause for a moment
+      strip.show(); 
+      delay(wait);  
     }
   }
 }
 
 void rainbow(int wait) {
-  for(long firstPixelHue = 0; firstPixelHue < 3*65536; firstPixelHue += 256) {
-    for(int i=0; i<strip.numPixels(); i++) { 
-      int pixelHue = firstPixelHue + (i * 65536L / strip.numPixels());
-      strip.setPixelColor(i, strip.gamma32(strip.ColorHSV(pixelHue)));
-    }
-    strip.show(); 
+  for(long firstPixelHue = 0; firstPixelHue < 5*65536; firstPixelHue += 256) {
+    strip.setBrightness(255); 
+    strip.rainbow(firstPixelHue);
+    strip.show();
     delay(wait); 
   }
 }
 
-void theaterChaseRainbow(int wait) {
-  int firstPixelHue = 0;   
-  for(int a=0; a<30; a++) {  
-    for(int b=0; b<3; b++) { 
-      strip.clear();  
-      for(int c=b; c<strip.numPixels(); c += 3) {
-        int      hue   = firstPixelHue + c * 65536L / strip.numPixels();
-        uint32_t color = strip.gamma32(strip.ColorHSV(hue)); 
-        strip.setPixelColor(c, color); 
+void rgbBreathe(uint32_t c, uint8_t y) {
+  for (int j = 0; j < 1; j++) {
+    for (uint8_t b = MinBrightness; b < MaxBrightness; b++) {
+      strip.setBrightness(b * 255 / 255);
+      for (uint16_t i = 0; i < strip.numPixels(); i++) {
+        strip.setPixelColor(i, c);
       }
-      strip.show();          
-      delay(wait);            
-      firstPixelHue += 65536 / 90; 
+      strip.show();
+      delay(fadeInWait);
+    }
+    strip.setBrightness(MaxBrightness * 255 / 255);
+    for (uint16_t i = 0; i < strip.numPixels(); i++) {
+      strip.setPixelColor(i, c);
+      strip.show();
+      delay(y);
+    }
+    for (uint8_t b = MaxBrightness; b > MinBrightness; b--) {
+      strip.setBrightness(b * 255 / 255);
+      for (uint16_t i = 0; i < strip.numPixels(); i++) {
+        strip.setPixelColor(i, c);
+      }
+      strip.show();
+      delay(fadeOutWait);
     }
   }
+  delay(10);
+}
+
+void rainbowBreathe(uint8_t y) {
+  for (int j = 0; j < 1; j++) {
+    for (uint8_t b = MinBrightness; b < MaxBrightness; b++) {
+      strip.setBrightness(b * 255 / 255);
+      for (uint8_t i = 0; i < strip.numPixels(); i++) {
+        strip.setPixelColor(i, Wheel(i * 256 / strip.numPixels()));
+      }
+      strip.show();
+      delay(fadeInWait);
+    }
+    strip.setBrightness(MaxBrightness * 255 / 255);
+    for (uint8_t i = 0; i < strip.numPixels(); i++) {
+      strip.setPixelColor(i, Wheel(i * 256 / strip.numPixels()));
+      strip.show();
+      delay(y);
+    }
+    for (uint8_t b = MaxBrightness; b > MinBrightness; b--) {
+      strip.setBrightness(b * 255 / 255);
+      for (uint8_t i = 0; i < strip.numPixels(); i++) {
+        strip.setPixelColor(i, Wheel(i * 256 / strip.numPixels()));
+      }
+      strip.show();
+      delay(fadeOutWait);
+    }
+  }
+}
+
+
+
+uint32_t Wheel(byte WheelPos) {
+  WheelPos = 140 - WheelPos;       //the value here means - for 255 the strip will starts with red, 127-red will be in the middle, 0 - strip ends with red.
+  if (WheelPos < 85) {
+    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  }
+  if (WheelPos < 170) {
+    WheelPos -= 85;
+    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+  WheelPos -= 170;
+  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }

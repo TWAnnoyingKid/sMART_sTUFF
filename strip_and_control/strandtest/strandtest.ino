@@ -2,7 +2,7 @@
 #ifdef __AVR__
  #include <avr/power.h> 
 #endif
-#define LED_PIN    5
+#define LED_PIN    10
 
 #define LED_COUNT 16
 int bri = 0;
@@ -34,11 +34,11 @@ void loop() {
   // theaterChase(strip.Color(127,   0,   0), 50);
   // theaterChase(strip.Color(  0,   0, 127), 50); 
   // rgbBreathe(strip.Color(255, 0, 0),  250); 
-  // rainbow(10); 
-  // theaterChaseRainbow(50);
+  rainbow(10); 
+
 
   
-  rainbowBreathe(250); 
+  // rainbowBreathe(250); 
 }
 
 void colorWipe(uint32_t color, int wait) {
