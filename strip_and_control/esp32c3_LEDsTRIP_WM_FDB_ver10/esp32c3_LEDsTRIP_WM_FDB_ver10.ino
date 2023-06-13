@@ -26,18 +26,18 @@ unsigned long previousTime = 0;
 const long timeoutTime = 2000;
 
 #define LED_PIN    10
-#define LED_COUNT 16
+#define LED_COUNT 120
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 int MinBrightness = 0;     
 int MaxBrightness = 255;  
-int fadeInWait = 10;     
-int fadeOutWait = 10; 
+int fadeInWait = 15;     
+int fadeOutWait = 15; 
 
 #define DATABASE_URL "https://esp8266-ai2-default-rtdb.firebaseio.com"
 #define API_KEY "AIzaSyAF4OdtYUAomk_4WnvE5MXb_nphlQ33UyA"
 #define USER_EMAIL "smart.stuff.18340@gmail.com"
 #define USER_PASSWORD "Rayed18340"
-FirebaseData fbdo, fbdo_ALL, fbdo_control;
+FirebaseData fbdo, fbdo_ALL, fbdo_control, fbdo_STRIP;
 FirebaseAuth auth;
 FirebaseConfig config;
 unsigned long sendDataPrevMillis = 0;
@@ -56,7 +56,7 @@ String CONTROLLER = A + "/CONTROLLER";
 String CONTROL = A + "/CONTROLBYCONTROLLER";
 String MODE = A + "/MODE";
 String CNSTAT = A + "/esp";
-int R= 0;
+int R= 255;
 int G= 0;
 int B= 0;
 int mode_set = 1;
@@ -96,9 +96,17 @@ void setup() {
     Serial.print ("ALL begin error ");
     Serial.println(fbdo_ALL.errorReason());
   }
+  if (!Firebase.RTDB.beginStream(&fbdo_STRIP, A)) {
+    Serial.print ("STRIP begin error ");
+    Serial.println(fbdo_STRIP.errorReason());
+  }
   if (Firebase.RTDB.getString(&fbdo_ALL, CONTROLLER)) {
     if (fbdo_ALL.stringData() != "0"){
-      controller_MAC = "/" + fbdo_ALL.stringData();
+      controller_MAC = fbdo_ALL.stringData();
+    }
+    if (!Firebase.RTDB.beginStream(&fbdo_control, controller_MAC)) {
+      Serial.print ("control begin error ");
+      Serial.println(fbdo_control.errorReason());
     }
   }
   if (Firebase.RTDB.getString(&fbdo_ALL, COLOR)) {
@@ -106,11 +114,8 @@ void setup() {
     G = fbdo_ALL.stringData().substring(3, 6).toInt();
     B = fbdo_ALL.stringData().substring(6, 9).toInt();
   }
-  if (controller_MAC != ""){
-    if (!Firebase.RTDB.beginStream(&fbdo_control, controller_MAC)) {
-      Serial.print ("Control begin error ");
-      Serial.println(fbdo_control.errorReason());
-    }
+  else if(!Firebase.RTDB.getString(&fbdo_ALL, COLOR)) {
+    Firebase.RTDB.setString(&fbdo_ALL, COLOR, "255000000");
   }
   Firebase.RTDB.setString(&fbdo_ALL, CONTROL, "0");
   Firebase.RTDB.setString(&fbdo_ALL, MODE, "1");
@@ -129,17 +134,22 @@ void setup() {
 
 void loop() {
   server.handleClient();
-  if (controlby == ""){
-    ReadStat();
-  }
-  if ((controller_MAC !="") && (controlby == "trig")){
+  ReadStat();
+
+  if (controlby == "trig"){
     controlbyMAC();
+  }
+  if (controlby != "trig"){
+    controlbySTRIP();
   }
   color_change();
   
   if (Firebase.isTokenExpired()){
     Firebase.refreshToken(&config);
-    Firebase.RTDB.setString(&fbdo, CNSTAT, "1");
+    Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "1");
+    if(controller_MAC != ""){
+      Firebase.RTDB.setString(&fbdo_control, controller_MAC + "/" + A, "2");
+    }
     Serial.println("Refresh token");
   }
 }
@@ -154,56 +164,87 @@ void ReadStat() {
   if (Firebase.ready() && signupOK) {
     if (!Firebase.RTDB.readStream(&fbdo_ALL)) {
       Serial.print("ALL read error：");
+      Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "1");
       Serial.println(fbdo_ALL.errorReason());
     }
     if (fbdo_ALL.streamAvailable()) {
       if (fbdo_ALL.dataPath() == "/esp"){
-        if(fbdo_ALL.dataType() == "string"){
-          if (fbdo_ALL.stringData() == "1") {
-            Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "2");
-          }
+        if (fbdo_ALL.stringData() == "1") {
+          Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "2");
         }
-      }
-////////////////////////////////////////////////////////////////
-      if (fbdo_ALL.dataPath() == "/COLOR"){
-        Serial.println(fbdo_ALL.stringData());
-        R = fbdo_ALL.stringData().substring(0, 3).toInt();
-        G = fbdo_ALL.stringData().substring(3, 6).toInt();
-        B = fbdo_ALL.stringData().substring(6, 9).toInt();
-      }
-////////////////////////////////////////////////////////////////
-      if (fbdo_ALL.dataPath() == "/MODE"){
-        Serial.println(fbdo_ALL.stringData());
-        mode_set = fbdo_ALL.stringData().toInt();
       }
 ////////////////////////////////////////////////////////////////
       if (fbdo_ALL.dataPath() == "/CONTROLLER"){
         if (fbdo_ALL.stringData() != "0") {
-          controller_MAC = "/" + fbdo_ALL.stringData();
+          controller_MAC =  fbdo_ALL.stringData();
           Serial.print("Now Connect To Controller : ");
           Serial.println(controller_MAC);
+          if (!Firebase.RTDB.beginStream(&fbdo_control, controller_MAC)) {
+            Serial.print ("control begin error ");
+            Serial.println(fbdo_control.errorReason());
+          }
         }
         else{
           controller_MAC = "";
+          Serial.print("Controller Disconnect");
         }
       }
 ////////////////////////////////////////////////////////////////
       if (fbdo_ALL.dataPath() == "/CONTROLBYCONTROLLER"){
         if (fbdo_ALL.stringData() == "1") {
-          controlby = "trig";
           if(controller_MAC != ""){
-            if (!Firebase.RTDB.beginStream(&fbdo_control, controller_MAC)) {
-              Serial.print ("Control begin error ");
-              Serial.println(fbdo.errorReason());
-            }
+              Firebase.RTDB.setString(&fbdo_control, controller_MAC + "/" + A, "1");
+              controlby = "trig";
+              if(Firebase.RTDB.getString(&fbdo_control, controller_MAC+"/COLOR")){
+                R = fbdo_control.stringData().substring(0, 3).toInt();
+                G = fbdo_control.stringData().substring(3, 6).toInt();
+                B = fbdo_control.stringData().substring(6, 9).toInt();
+              }
+              if(Firebase.RTDB.getString(&fbdo_control, controller_MAC+"/MODE")){
+                mode_set = fbdo_control.stringData().toInt();
+              }
+              Serial.println("NOW CONTROL BY CONTROLLER");
           }
           else{
             Firebase.RTDB.setString(&fbdo_ALL, CONTROL, "0");
           }
         }
         else if (fbdo_ALL.stringData() == "0") {
+          Firebase.RTDB.setString(&fbdo_control, controller_MAC + "/" + A, "0");
+          Firebase.RTDB.setString(&fbdo_STRIP, CONTROL, "2");
           controlby = "";
+          if(Firebase.RTDB.getString(&fbdo_STRIP, COLOR)){
+            R = fbdo_STRIP.stringData().substring(0, 3).toInt();
+            G = fbdo_STRIP.stringData().substring(3, 6).toInt();
+            B = fbdo_STRIP.stringData().substring(6, 9).toInt();
+          }
+          if(Firebase.RTDB.getString(&fbdo_STRIP, MODE)){
+            mode_set = fbdo_STRIP.stringData().toInt();
+          }
+          Serial.println("NOW CONTROL BY STRIP");
         }
+      }
+    }
+  }
+}
+void controlbySTRIP(){
+  if (Firebase.ready() && signupOK) {
+    if (!Firebase.RTDB.readStream(&fbdo_STRIP)) {
+      Firebase.RTDB.setString(&fbdo_STRIP, CONTROL, "0");
+      Serial.print("STRIP read error：");
+      Serial.println(fbdo_STRIP.errorReason());
+    }
+    if (fbdo_STRIP.streamAvailable()) {
+      if (fbdo_STRIP.dataPath() == "/COLOR"){
+        Serial.println(fbdo_STRIP.stringData());
+        R = fbdo_STRIP.stringData().substring(0, 3).toInt();
+        G = fbdo_STRIP.stringData().substring(3, 6).toInt();
+        B = fbdo_STRIP.stringData().substring(6, 9).toInt();
+      }
+////////////////////////////////////////////////////////////////
+      if (fbdo_STRIP.dataPath() == "/MODE"){
+        Serial.println(fbdo_STRIP.stringData());
+        mode_set = fbdo_STRIP.stringData().toInt();
       }
     }
   }
@@ -212,6 +253,7 @@ void ReadStat() {
 void controlbyMAC(){
   if (Firebase.ready() && signupOK) {
     if (!Firebase.RTDB.readStream(&fbdo_control)) {
+      Firebase.RTDB.setString(&fbdo_control, controller_MAC + "/" + A, "1");
       Serial.print("CONTROL read error：");
       Serial.println(fbdo_control.errorReason());
     }
@@ -236,7 +278,7 @@ void color_change(){
       colorWipe(strip.Color(R, G, B), 5);
       break;
     case 2:  //單色呼吸
-      rgbBreathe(strip.Color(R, G, B), 250);
+      rgbBreathe(strip.Color(R, G, B), 50);
       break;
     case 3:  //單色跑馬燈
       theaterChase(strip.Color(R, G, B), 50);
@@ -245,7 +287,7 @@ void color_change(){
       rainbow(10);
       break;
     case 5:  //彩虹呼吸燈
-      rainbowBreathe(250); 
+      rainbowBreathe(500); 
       break;
     case 6:
       close_led(strip.Color(R, G, B), 5);
@@ -256,18 +298,17 @@ void color_change(){
 void close_led(uint32_t color, int wait){
   for(int i=0; i<strip.numPixels(); i++) {
     strip.setBrightness(0);   
-    strip.show();         
     delay(wait);            
   }
+  strip.show(); 
 }
 
 void colorWipe(uint32_t color, int wait) {
   for(int i=0; i<strip.numPixels(); i++) {
     strip.setBrightness(255); 
-    strip.setPixelColor(i, color);   
-    strip.show();         
-    delay(wait);            
+    strip.setPixelColor(i, color);            
   }
+  strip.show();  
 }
 
 void theaterChase(uint32_t color, int wait) {
@@ -285,7 +326,7 @@ void theaterChase(uint32_t color, int wait) {
 }
 
 void rainbow(int wait) {
-  for(long firstPixelHue = 0; firstPixelHue < 5*65536; firstPixelHue += 256) {
+  for(long firstPixelHue = 0; firstPixelHue < 1*65536; firstPixelHue += 256) {
     strip.setBrightness(255); 
     strip.rainbow(firstPixelHue);
     strip.show();
