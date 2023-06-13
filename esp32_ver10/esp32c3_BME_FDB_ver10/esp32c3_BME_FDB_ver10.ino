@@ -13,7 +13,7 @@
 
 #include "addons/TokenHelper.h"
 #include "addons/RTDBHelper.h"
-#define DHTPIN 3 
+#define DHTPIN 10
 #define DHTTYPE DHT22  
 
 String ele = "bme";
@@ -26,26 +26,27 @@ DHT dht(DHTPIN, DHTTYPE);
 WebServer server(80);
 
 String header;
-
-const int rs = D2;
+int rs = D9;
 
 unsigned long currentTime = millis();
 unsigned long previousTime = 0; 
 const long timeoutTime = 2000;
 #define DATABASE_URL "https://esp8266-ai2-default-rtdb.firebaseio.com"
 #define API_KEY "AIzaSyAF4OdtYUAomk_4WnvE5MXb_nphlQ33UyA" 
-FirebaseData fbdo, fbdo_ALL, fbdo_D4;
+FirebaseData fbdo, fbdo_ALL;
 FirebaseAuth auth;
 FirebaseConfig config;
 unsigned long sendDataPrevMillis = 0;
 int count = 0;
 bool signupOK = false;
 
-String A = "";
+String A = WiFi.macAddress();
 String IP = "";
-String STAT1 = "";
-String STAT2 = "";
-String CNSTAT = "";
+String Temp_Set = A + "/Temperature";
+String Humid_Set = A + "/Humidity";
+String CNSTAT = A + "/esp";
+String h;
+String t;
 
 void setup() {
   Serial.begin(115200);
@@ -61,15 +62,9 @@ void setup() {
   }
   
   wifiManager.autoConnect("sMART sTUFF");
-
-  A = WiFi.macAddress();
   IP =  WiFi.localIP().toString();
   timeClient.begin();
   timeClient.setTimeOffset(28800);
-
-  STAT1 = A + "/Temperature";
-  STAT2 = A + "/Humidity";
-  CNSTAT = A + "/esp";
   
   config.api_key = API_KEY;
   config.database_url = DATABASE_URL;
@@ -88,11 +83,10 @@ void setup() {
     Serial.print ("ALL begin error ");
     Serial.println(fbdo_ALL.errorReason());
   }
-  Firebase.RTDB.setStreamCallback(&fbdo_ALL, call, streamTimeoutCallback);
-  Firebase.RTDB.setFloat(&fbdo_ALL, STAT1, dht.readTemperature());
-  Firebase.RTDB.setFloat(&fbdo_ALL, STAT2, dht.readHumidity());
-  // Firebase.RTDB.setFloat(&fbdo_ALL, STAT1, bme.readTemperature());
-  // Firebase.RTDB.setFloat(&fbdo_ALL, STAT2, bme.readHumidity());
+  Firebase.RTDB.setString(&fbdo_ALL, Temp_Set, "0");
+  Firebase.RTDB.setString(&fbdo_ALL, Humid_Set, "0");
+  // Firebase.RTDB.setFloat(&fbdo_ALL, Temp_Set, bme.readTemperature());
+  // Firebase.RTDB.setFloat(&fbdo_ALL, Humid_Set, bme.readHumidity());
   Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "0");
   
   server.on("/info", handleINFO);
@@ -104,6 +98,7 @@ void setup() {
 void loop(){
   server.handleClient();
   time();
+  ReadStat();
 
   if (Firebase.isTokenExpired()){
     Firebase.refreshToken(&config);
@@ -112,45 +107,52 @@ void loop(){
   }
 
 }
-void streamTimeoutCallback(bool timeout){
-  if (timeout){
-    Serial.println("stream timeout, resuming...\n");
-  }
-  if (!fbdo_ALL.httpConnected()){
-    Serial.printf("error code: %d, reason: %s\n\n", fbdo_ALL.httpCode(), fbdo_ALL.errorReason().c_str());
-  } 
-}
 void handleINFO(void){
   server.send ( 200, "text/plain", "<h1>MAC=" + A + "</h1><h2>ELEMENT=" + ele + "</h2><h3>裝置名稱 = sMART sTUFF 溫溼度感測器</h3><h4>IP=" + IP + "</h4>" ); 
 }
 void handleNotFound(){                                 
   server.send(404, "text/plain", "404: Not found");   
 }
-void call(FirebaseStream data){
-  if(Firebase.ready() && signupOK){
-    if (fbdo_ALL.dataPath() == "/esp"){
+void ReadStat() {
+  if (Firebase.ready() && signupOK) {
+    if (!Firebase.RTDB.readStream(&fbdo_ALL)) {
+      Serial.print("ALL read error：");
+      Serial.println(fbdo_ALL.errorReason());
+    }
+    if (fbdo_ALL.streamAvailable()) {
+      if (fbdo_ALL.dataPath() == "/esp"){
         if(fbdo_ALL.dataType() == "string"){
           if (fbdo_ALL.stringData() == "1") {
             Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "2");
           }
         }
       }
-    if (fbdo_ALL.dataPath() == "/Humidity"){
-      Serial.print(fbdo_ALL.floatData());
-      Serial.println(" % ");
-    }
-    if (fbdo_ALL.dataPath() == "/Temperature"){
-      Serial.print(fbdo_ALL.floatData());
-      Serial.println(" *C ");
+      if (fbdo_ALL.dataPath() == "/Humidity"){
+        Serial.print(fbdo_ALL.stringData());
+        Serial.println(" % ");
+      }
+      if (fbdo_ALL.dataPath() == "/Temperature"){
+        Serial.print(fbdo_ALL.stringData());
+        Serial.println(" *C ");
+      }
     }
   }
 }
 void time() {
   timeClient.update();
   if (timeClient.getSeconds() == 0 || timeClient.getSeconds() == 15 || timeClient.getSeconds() == 30 || timeClient.getSeconds() == 45) {
-    Firebase.RTDB.setFloat(&fbdo, STAT1, dht.readTemperature());
-    Firebase.RTDB.setFloat(&fbdo, STAT2, dht.readHumidity());
-    // Firebase.RTDB.setFloat(&fbdo, STAT1, bme.readTemperature());
-    // Firebase.RTDB.setFloat(&fbdo, STAT2, bme.readHumidity());
+    h = dht.readHumidity();
+    t = dht.readTemperature();
+    Serial.print("TEMP=");
+    Serial.print(t);
+    Serial.print("*C");
+    Serial.print(" \\ HUMID=");
+    Serial.print(h);
+    Serial.println("%");
+    Firebase.RTDB.setString(&fbdo_ALL, Temp_Set, t);
+    Firebase.RTDB.setString(&fbdo_ALL, Humid_Set, h);
+    // Firebase.RTDB.setFloat(&fbdo, Temp_Set, bme.readTemperature());
+    // Firebase.RTDB.setFloat(&fbdo, Humid_Set, bme.readHumidity());
   }
+  
 }
