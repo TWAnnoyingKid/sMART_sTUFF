@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>MainPage</title>
+        <meta charset="UTF-8">
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    </head>
+    <body>
+        <h1> sMART sTUFF</h1>
+        <h2 id="welcome"></h2>
+        <h2 id="username"></h2>
+        <h2 id="deviceplce"></h2>
+        
+        <a href="login.html">
+            <button type="button" id="login">登入</button>
+        </a>
+
+        <p id="noaccount">沒有帳號嗎?<a href="signup.html" id="signup">註冊</a></p>
+
+        <button type="button" id="logout">登出</button><br>
+        <button type="button" id="device">查看擁有的裝置</button>
+        
+        <script>
+            const user = Cookies.get('user');
+            var logout = document.querySelector("#logout");
+            var username = document.querySelector("#username");
+            var welcome = document.querySelector("#welcome");
+
+            if (user != undefined){
+                welcome.innerHTML = "歡迎! 使用者";
+                username.innerHTML =user;
+                document.getElementById("login").style.display='none'
+                document.getElementById("logout").style.display='block'
+                document.getElementById("signup").style.display='none'
+                document.getElementById("noaccount").style.display='none'
+                document.getElementById("device").style.display='block'
+                
+            }else{
+                document.getElementById("login").style.display='block'
+                document.getElementById("logout").style.display='none'
+                document.getElementById("signup").style.display='block'
+                document.getElementById("noaccount").style.display='block'
+                document.getElementById("device").style.display='none'
+            }
+
+            function out() {
+                Cookies.remove('user')
+                window.location.href = "mainpage.html"
+            }
+
+            logout.addEventListener('click', out)
+        </script>
+
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
+            import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-analytics.js";
+            const firebaseConfig = {
+              apiKey: "AIzaSyCF75el0I5Ni587JaOnNVOoqAzWuJG2agY",
+              authDomain: "user-login-time.firebaseapp.com",
+              databaseURL: "https://user-login-time-default-rtdb.firebaseio.com",
+              projectId: "user-login-time",
+              storageBucket: "user-login-time.appspot.com",
+              messagingSenderId: "975739925033",
+              appId: "1:975739925033:web:bbb3193030ed8e5425e238",
+              measurementId: "G-KYLDQQK1GK"
+            };
+          
+            const app = initializeApp(firebaseConfig);
+            const analytics = getAnalytics(app);
+
+            import { getDatabase, set, get, update, remove, ref, child } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-database.js";
+            const db = getDatabase();
+            var deviceplce = document.querySelector("#deviceplce");
+            var deviceBtn = document.querySelector("#device");
+            var username = document.querySelector("#username");
+
+            function deviceCheck(){
+                const user = username.innerHTML
+                const dbref = ref(db)
+                get(child(dbref, user))
+                .then((snapshot)=>{
+                    if (snapshot.exists()) {
+                        deviceplce.innerHTML = snapshot.val()
+                    }
+                })
+
+            }
+            
+            deviceBtn.addEventListener('click', deviceCheck)
+          </script>
+    </body>
+</html>

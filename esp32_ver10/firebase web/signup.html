@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>sIGN UP</title>
+        <meta charset="UTF-8">
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    </head>
+    <body>
+        <h1> sIGN UP</h1>
+        <h2> 帳號 </h2>
+        <input id="account">
+        <h2> 密碼 </h2>
+        <input type="password" id="password">
+        <h2> 確認密碼 </h2>
+        <input type="password" id="confirmpassword">
+        <h2> EMAIL </h2>
+        <input id="email">
+        <h2> 電話號碼 </h2>
+        <input id="phone"><br><br>
+        <button type="button" id="signup">註冊</button>
+        <a href="mainpage.html">
+            <button type="button" id="back">回到主頁面</button><br>
+        </a>
+
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
+            import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-analytics.js";
+            const firebaseConfig = {
+              apiKey: "AIzaSyD0UmlJNoacdrBfyZ50h0FyEI0yHKWUwBs",
+              authDomain: "user-data-2e9be.firebaseapp.com",
+              databaseURL: "https://user-data-2e9be-default-rtdb.firebaseio.com",
+              projectId: "user-data-2e9be",
+              storageBucket: "user-data-2e9be.appspot.com",
+              messagingSenderId: "261163235969",
+              appId: "1:261163235969:web:c60872f373060f75cb2b80",
+              measurementId: "G-2X855JVZ8V"
+            };
+          
+            const app = initializeApp(firebaseConfig);
+            const analytics = getAnalytics(app);
+
+            import { getDatabase, set, get, update, remove, ref, child } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-database.js";
+            const db = getDatabase();
+
+            var account = document.querySelector("#account");
+            var password = document.querySelector("#password");
+            var confirmpassword = document.querySelector("#confirmpassword");
+            var email = document.querySelector("#email");
+            var phone = document.querySelector("#phone");
+            var signupBtn = document.querySelector("#signup");
+
+            function signupData(){
+                const dbref = ref(db);
+                if(account.value == "" || password.value == "" || confirmpassword.value == "" || email.value == "" || phone.value == ""){
+                    alert("請輸入完整資料");
+                }
+                else if(password.value != confirmpassword.value){
+                    alert("密碼不相同");
+                }
+                else{
+                    get(child(dbref, "UserData/使用者" + account.value))
+                    .then((snapshot)=>{
+                        if (snapshot.exists()) {
+                            alert("註冊失敗, 帳號已被註冊");
+                        }else{
+                            set(ref(db, "UserData/使用者" + account.value),{
+                                account: '"' + account.value + '"',
+                                password: '"' + password.value + '"',
+                                email: '"' + email.value + '"',
+                                phone: '"' + phone.value + '"'
+                            })
+                            .then(()=>{
+                                alert("帳號創建成功")
+                                window.location.href = "mainpage.html"
+                            })
+                        }
+                    })
+                }
+            }
+            signupBtn.addEventListener('click', signupData);
+          </script>
+    </body>
+</html>

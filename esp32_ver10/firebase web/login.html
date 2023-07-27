@@ -3,30 +3,26 @@
     <head>
         <title>FireBase Login Test</title>
         <meta charset="UTF-8">
-        <link rel="stylesheet" href="style.css">
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
     </head>
     <body>
-        <h1> FIREBASE 登入測試</h1>
+        <h1> LOGIN</h1>
         <h2> 帳號 </h2>
         <input id="account">
         <h2> 密碼 </h2>
-        <input id="password">
+        <input type="password" id="password">
         <br><br><br>
-        <button type="button" id="login">登入測試</button><br>
+        <button type="button" id="login">登入</button>
+        <a href="mainpage.html">
+            <button type="button" id="back">回到主頁面</button><br>
+        </a><br>
+        <p>沒有帳號嗎? <a href="signup.html" id="signup">註冊</a></p><br><br>
+        
         <h3 id="findAccount"></h3>
-        <h3 id="findPassword"></h3>
-        <h3 id="findPhoneNumber"></h3>
-        <h3 id="findEmail"></h3>
 
         <script type="module">
-            // Import the functions you need from the SDKs you need
             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
             import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-analytics.js";
-            // TODO: Add SDKs for Firebase products that you want to use
-            // https://firebase.google.com/docs/web/setup#available-libraries
-          
-            // Your web app's Firebase configuration
-            // For Firebase JS SDK v7.20.0 and later, measurementId is optional
             const firebaseConfig = {
               apiKey: "AIzaSyD0UmlJNoacdrBfyZ50h0FyEI0yHKWUwBs",
               authDomain: "user-data-2e9be.firebaseapp.com",
@@ -38,7 +34,6 @@
               measurementId: "G-2X855JVZ8V"
             };
           
-            // Initialize Firebase
             const app = initializeApp(firebaseConfig);
             const analytics = getAnalytics(app);
 
@@ -49,9 +44,6 @@
             var password = document.querySelector("#password");
             var loginBtn = document.querySelector("#login");
             var findAccount = document.querySelector("#findAccount");
-            var findPassword = document.querySelector("#findPassword");
-            var findPhoneNumber = document.querySelector("#findPhoneNumber");
-            var findEmail = document.querySelector("#findEmail");
 
             function loginData() {
                 const dbref = ref(db);
@@ -60,7 +52,10 @@
                     if (snapshot.exists()) {
                         const Password = '"' + password.value + '"'
                         if (Password == snapshot.val().password){
-                            alert("登入成功")
+                            alert("登入成功");
+                            Cookies.set('user', account.value, { expires : 7 });
+                            // findAccount.innerHTML = "歡迎使用者" + snapshot.val().account;
+                            window.location.href = "mainpage.html"
                         }else{
                             alert("密碼錯誤")
                         }
