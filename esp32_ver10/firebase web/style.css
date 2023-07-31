@@ -1,0 +1,61 @@
+.NameOfDevice{
+    font-size: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+}
+.SS{
+    font-size: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+}
+.name{
+    display: inline;
+    font-size: 30px;
+}
+.ChangeName{
+    width :33px;
+    height : 33px;  
+}
+.Time{
+    width :180px;
+    height : 35px;
+    font-size: 20px; 
+    font-weight:700; 
+}
+.SW{
+    width :364px;
+    height : 35px;
+    font-size: 20px; 
+    font-weight:700;
+}
+.main{
+    width :365px;
+    height : 120px;
+}
+.head{
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+}
+.goBackDevicePage{
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+}
+.bmeNumber{
+    font-size: 92px; 
+    display: inline;
+}
+.bmeTag{
+    font-size: 35px; 
+    display: inline;
+}
+.bme{
+    width :260px;
+}
+.bmeSys{
+    font-size: 40px; 
+    display: inline; 
+}

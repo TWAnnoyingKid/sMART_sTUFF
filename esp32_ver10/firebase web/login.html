@@ -18,7 +18,11 @@
         </a><br>
         <p>沒有帳號嗎? <a href="signup.html" id="signup">註冊</a></p><br><br>
         
-        <h3 id="findAccount"></h3>
+        <dialog id="loginFail">
+            <p>登入失敗, 請確認輸入的資訊</p>
+            <button id="close" onclick="loginFail.close()">close</button>
+        </dialog>
+
 
         <script type="module">
             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
@@ -52,15 +56,14 @@
                     if (snapshot.exists()) {
                         const Password = '"' + password.value + '"'
                         if (Password == snapshot.val().password){
-                            alert("登入成功");
                             Cookies.set('user', account.value, { expires : 7 });
                             // findAccount.innerHTML = "歡迎使用者" + snapshot.val().account;
                             window.location.href = "mainpage.html"
                         }else{
-                            alert("密碼錯誤")
+                            loginFail.showModal()
                         }
                     }else{
-                        alert("帳號不存在")
+                        loginFail.showModal()
                     }
                 })
             }
