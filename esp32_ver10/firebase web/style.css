@@ -5,10 +5,19 @@
     align-items: center; 
 }
 .SS{
-    font-size: 50px;
+    font-size: 200%;
     display: flex;
     justify-content: center;
     align-items: center; 
+}
+.login{
+    font-size: 20px;
+    display: inline;
+}
+.accountData{
+    width :250px;
+    height : 25px;
+    display: inline;
 }
 .name{
     display: inline;
@@ -22,13 +31,30 @@
     width :180px;
     height : 35px;
     font-size: 20px; 
-    font-weight:700; 
+    font-weight:700;
+     
+}
+button[name=devices]{
+    width :180px;
+    height : 40px;
+    font-size: 20px; 
+    font-weight:700;
 }
 .SW{
     width :364px;
     height : 35px;
     font-size: 20px; 
     font-weight:700;
+}
+.AD{
+    width :350px;
+    height : 35px;
+}
+.loginBTN{
+    width :180px;
+    height : 350px;
+    /* display: flex;
+    justify-content: center; */
 }
 .main{
     width :365px;
@@ -53,7 +79,7 @@
     display: inline;
 }
 .bme{
-    width :260px;
+    width :280px;
 }
 .bmeSys{
     font-size: 40px; 

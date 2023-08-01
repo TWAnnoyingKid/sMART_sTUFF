@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="head">
     <head>
         <title>MainPage</title>
         <meta charset="UTF-8">
@@ -8,24 +8,24 @@
     </head>
     <body>
         <div class="SS">
-            <h1> sMART <img src="picture\sloth.png" width="70px" height="70px"> sTUFF</h1>
+            <h1 > sMART <img src="picture\sloth.png" width="70px" height="70px"> sTUFF</h1>
         </div>
         <h2 id="welcome" style="display: inline;"></h2>
-        <h2 id="username" style="display: inline;"></h2><br><br>
-        
-        
+        <h2 id="username" style="display: inline;"></h2><br>
         
         <a href="login.html">
             <button type="button" id="login">登入</button>
         </a>
-
-        <p id="noaccount">沒有帳號嗎?<a href="signup.html" id="signup">註冊</a></p>
-
-        <button type="button" id="logout">登出</button><br>
         
-        <a href="devicepage.html">
-            <button type="button" id="device">查看擁有的裝置</button>
-        </a><br>
+        <h4 id="noaccount" style="display:inline;">沒有帳號嗎?
+            <a href="signup.html" id="signup" style="display: inline;">註冊</a>
+        </h4>
+        
+        
+        <br>
+        <button type="button" id="logout" class="Time">登出</button><br>
+        <button type="button" id="device" class="Time" onclick="location.href='devicepage.html'">查看擁有的裝置</button>
+        <br>
         
 
         <div id="deviceplce"></div>

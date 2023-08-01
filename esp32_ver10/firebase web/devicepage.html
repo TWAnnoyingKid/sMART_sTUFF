@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="head">
     <head>
         <title>DevicePage</title>
         <meta charset="UTF-8">
@@ -8,12 +8,21 @@
     </head>
     <body>
         <div class="SS">
-            <h1> sMART <img src="picture\sloth.png" width="70px" height="70px"> sTUFF</h1>
+            <h1 > sMART <img src="picture\sloth.png" width="70px" height="70px"> sTUFF</h1>
         </div>
         <ul id="deviceplace"></ul>
+        <div>
+            <h2 id="noUser"></h2>
+        </div>
+        <br><br>
         <a href="mainpage.html">
-            <button type="button" id="back">回到主頁面</button><br>
-        </a><br>
+            <button type="button" id="back" class="Time">回到主頁面</button><br>
+        </a>
+        
+        <dialog id="UserLost">
+            <h1>糟糕! 甚麼地方出錯了!<br>請再試一次!</h1>
+            <button onclick="UserLost.close(); location.href='mainpage.html'">確認</button>
+        </dialog>
 
         <script type="module">
             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
@@ -36,27 +45,33 @@
             const db = getDatabase();
 
             function deviceCheck(){
-                const user = Cookies.get('user')
-                const dbref = ref(db, user)
-                var br = document.createElement("br")
-
-                if(Cookies.get('device')){
-                    Cookies.remove('device')
+                if(Cookies.get('user')){
+                    const user = Cookies.get('user')
+                    const dbref = ref(db, user)
+                    if(Cookies.get('device')){
+                        Cookies.remove('device')
+                    }
+                    onValue(dbref, (snapshot) => {
+                        snapshot.forEach((childSnapshot) => {
+                            let devicestop = childSnapshot.val()
+                            addItems(devicestop);
+                        })
+                    }) 
+                }else{
+                    var noUser = document.querySelector('#noUser')
+                    UserLost.showModal()
                 }
-                onValue(dbref, (snapshot) => {
-                    snapshot.forEach((childSnapshot) => {
-                        let devicestop = childSnapshot.val()
-                        addItems(devicestop);
-                    })
-                }) 
             }
 
             function addItems(devicestop){
                 var deviceplace = document.getElementById('deviceplace')
-                let _devicestop = document.createElement('button')
-                let br = document.createElement('br')
+                var _devicestop = document.createElement('button')
+                var br = document.createElement('br')
+                var p = document.createElement('p')
 
+                p.innerHTML="  "
                 _devicestop.innerHTML = devicestop.replace('"', '').split(" ")[0]
+                _devicestop.name = "devices"
                 _devicestop.id = devicestop.replace('"', '').replace('"', '').split(" ")
                 _devicestop.onclick = function deviceSetup(){
                     Cookies.set('device', _devicestop.id)
@@ -64,6 +79,7 @@
                 }
                 deviceplace.appendChild(_devicestop);
                 deviceplace.appendChild(br);
+                deviceplace.appendChild(p);
             }
 
             window.onload(deviceCheck());
