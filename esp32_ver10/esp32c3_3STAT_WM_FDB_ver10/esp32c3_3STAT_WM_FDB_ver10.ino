@@ -163,6 +163,7 @@ void loop() {
 
   if (Firebase.isTokenExpired()){
     Firebase.refreshToken(&config);
+    Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "0");
     Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "1");
     Serial.println("Refresh token");
   }
@@ -180,6 +181,16 @@ void ReadStat() {
       Serial.println(fbdo_ALL.errorReason());
     }
     if (fbdo_ALL.streamAvailable()) {
+      Serial.println("Path : " + fbdo_ALL.streamPath() + fbdo_ALL.dataPath());
+      Serial.println("Data : " + fbdo_ALL.stringData());
+      if (fbdo_ALL.dataPath() == "/esp"){
+        if (fbdo_ALL.stringData() == "1") {
+          Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "2");
+        }else if (fbdo_ALL.stringData().substring(2, 5) == "esp"){
+          Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "2");
+        }
+      }
+      ///////////////////////////////////////////////////////////
       if (fbdo_ALL.dataPath() == "/D1"){
         if (fbdo_ALL.stringData() == CloseNum) {
           digitalWrite(output1, HIGH);
@@ -205,13 +216,6 @@ void ReadStat() {
         } else if (fbdo_ALL.stringData() == OnNum) {
           digitalWrite(output3, LOW);
           Serial.println("D3 ON");
-        }
-      }
-      if (fbdo_ALL.dataPath() == "/esp"){
-        if(fbdo_ALL.dataType() == "string"){
-          if (fbdo_ALL.stringData() == "1") {
-            Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "2");
-          }
         }
       }
       ///////////////////////////////////////////////////////////
@@ -252,6 +256,7 @@ void ReadStat() {
           Serial.println("D3_TC now is " + D3_TC);
         } 
       }
+    ///////////////////////////////////////////////////////////
     }
   }
 }
