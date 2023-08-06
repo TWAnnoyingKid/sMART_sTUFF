@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html class="head">
+    <head>
+        <title>Login</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="style.css">
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    </head>
+    <body>
+        <div class="SS" onclick="location.href='mainpage.html'">
+            <div style="width:130px">
+                <img src="picture\sloth.png" width="120px" height="120px">  
+            </div>
+            <h1> sMART <br> sTUFF</h1>
+        </div>
+        <br><br><br>
+        <div style="width: 255px; margin:0px auto;">
+            <div>
+               <input id="account" class="accountData" placeholder="帳號">
+                <br><br>
+                <input type="password" id="password" class="accountData" placeholder="密碼"><br> 
+                <p onclick="location.href='forgetPassword.html'" style="font-size: 5px;">忘記密碼?</p>
+            </div>
+            <br>
+            <div class="loginBTN">
+                <button type="button" id="login" class="Time">登入</button>
+                <h4>沒有帳號嗎? 
+                    <a href="signup.html" id="signup" style="display: inline;">註冊</a>
+                </h4>
+                <br><br><br><br><br><br>
+                <a href="mainpage.html">
+                    <button type="button" id="back" class="back">回到主頁面</button><br>
+                </a><br>
+            </div>
+            
+        </div>
+        
+        <dialog id="loginFail">
+            <p>登入失敗, 請確認輸入的資訊</p>
+            <button id="close" onclick="loginFail.close()">close</button>
+        </dialog>
+
+
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
+            import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-analytics.js";
+            const firebaseConfig = {
+              apiKey: "AIzaSyD0UmlJNoacdrBfyZ50h0FyEI0yHKWUwBs",
+              authDomain: "user-data-2e9be.firebaseapp.com",
+              databaseURL: "https://user-data-2e9be-default-rtdb.firebaseio.com",
+              projectId: "user-data-2e9be",
+              storageBucket: "user-data-2e9be.appspot.com",
+              messagingSenderId: "261163235969",
+              appId: "1:261163235969:web:c60872f373060f75cb2b80",
+              measurementId: "G-2X855JVZ8V"
+            };
+          
+            const app = initializeApp(firebaseConfig);
+            const analytics = getAnalytics(app);
+
+            import { getDatabase, set, get, update, remove, ref, child } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-database.js";
+            const db = getDatabase();
+
+            var account = document.querySelector("#account");
+            var password = document.querySelector("#password");
+            var loginBtn = document.querySelector("#login");
+
+            function loginData() {
+                const dbref = ref(db);
+                get(child(dbref, "UserData/使用者" + account.value))
+                .then((snapshot)=>{
+                    if (snapshot.exists()) {
+                        const Password = '"' + password.value + '"'
+                        if (Password == snapshot.val().password){
+                            Cookies.set('user', account.value, { expires : 7 });
+                            // findAccount.innerHTML = "歡迎使用者" + snapshot.val().account;
+                            window.location.href = "mainpage.html"
+                        }else{
+                            loginFail.showModal()
+                        }
+                    }else{
+                        loginFail.showModal()
+                    }
+                })
+            }
+
+            loginBtn.addEventListener('click', loginData);
+
+          </script>
+    </body>
+</html>
