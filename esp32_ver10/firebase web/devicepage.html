@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html class="head">
+    <head>
+        <title>DevicePage</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="style.css">
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    </head>
+    <body>
+        <div class="SS">
+            <h1 > sMART <img src="picture\sloth.png" width="70px" height="70px"> sTUFF</h1>
+        </div>
+        <ul id="deviceplace"></ul>
+        <div>
+            <h2 id="noUser"></h2>
+        </div>
+        <br><br>
+        <a href="mainpage.html">
+            <button type="button" id="back" class="Time">回到主頁面</button><br>
+        </a>
+        
+        <dialog id="UserLost">
+            <h1>糟糕! 甚麼地方出錯了!<br>請再試一次!</h1>
+            <button onclick="UserLost.close(); location.href='mainpage.html'">確認</button>
+        </dialog>
+
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
+            import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-analytics.js";
+            const firebaseConfig = {
+              apiKey: "AIzaSyCF75el0I5Ni587JaOnNVOoqAzWuJG2agY",
+              authDomain: "user-login-time.firebaseapp.com",
+              databaseURL: "https://user-login-time-default-rtdb.firebaseio.com",
+              projectId: "user-login-time",
+              storageBucket: "user-login-time.appspot.com",
+              messagingSenderId: "975739925033",
+              appId: "1:975739925033:web:bbb3193030ed8e5425e238",
+              measurementId: "G-KYLDQQK1GK"
+            };
+          
+            const app = initializeApp(firebaseConfig);
+            const analytics = getAnalytics(app);
+
+            import { getDatabase, get , ref, child, onValue } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-database.js";
+            const db = getDatabase();
+
+            function deviceCheck(){
+                if(Cookies.get('user')){
+                    const user = Cookies.get('user')
+                    const dbref = ref(db, user)
+                    if(Cookies.get('device')){
+                        Cookies.remove('device')
+                    }
+                    onValue(dbref, (snapshot) => {
+                        snapshot.forEach((childSnapshot) => {
+                            let devicestop = childSnapshot.val()
+                            addItems(devicestop);
+                        })
+                    }) 
+                }else{
+                    var noUser = document.querySelector('#noUser')
+                    UserLost.showModal()
+                }
+            }
+
+            function addItems(devicestop){
+                var deviceplace = document.getElementById('deviceplace')
+                var _devicestop = document.createElement('button')
+                var br = document.createElement('br')
+                var p = document.createElement('p')
+
+                p.innerHTML="  "
+                _devicestop.innerHTML = devicestop.replace('"', '').split(" ")[0]
+                _devicestop.name = "devices"
+                _devicestop.id = devicestop.replace('"', '').replace('"', '').split(" ")
+                _devicestop.onclick = function deviceSetup(){
+                    Cookies.set('device', _devicestop.id)
+                    location.href = devicestop.replace('"', '').split(" ")[2].replace('"', '') + ".html"
+                }
+                deviceplace.appendChild(_devicestop);
+                deviceplace.appendChild(br);
+                deviceplace.appendChild(p);
+            }
+
+            window.onload(deviceCheck());
+          </script>
+    </body>
+</html>

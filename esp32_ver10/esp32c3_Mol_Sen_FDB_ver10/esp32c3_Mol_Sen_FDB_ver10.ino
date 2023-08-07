@@ -22,7 +22,8 @@ String header;
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org");
 const int water_pin = 2;
-const int rs = 3;
+const int water_pin2 = 3;
+const int rs = 4;
 int RS; 
 
 unsigned long currentTime = millis();
@@ -50,11 +51,13 @@ String WT = "";
 String STAT1 = A + "/Moisture";
 String WATER = A + "/WATER";
 String CNSTAT = A + "/esp";;
+String a = "\\\"";
 
 void setup() {
   Serial.begin(115200);
 
-  pinMode(water_pin, OUTPUT);  digitalWrite(water_pin, HIGH);
+  pinMode(water_pin, OUTPUT);   digitalWrite(water_pin, HIGH);
+  pinMode(water_pin2, OUTPUT);  digitalWrite(water_pin2, HIGH);
   pinMode(rs, INPUT);          digitalWrite(rs, HIGH);
   
   WiFiManager wifiManager;
@@ -108,16 +111,17 @@ void loop(){
 }
 void time(){
   timeClient.update();
-  String a = "\\\"";
-  String nowTime = a + timeClient.getHours() + ":" + timeClient.getMinutes() + a ;
+  String nowTime =timeClient.getHours() + ":" + timeClient.getMinutes();
   if (timeClient.getSeconds() > 0 & timeClient.getSeconds() < 2) {
     if(WT == nowTime){
       digitalWrite(water_pin, LOW);
+      digitalWrite(water_pin2, LOW);
     }
   }
   if (timeClient.getSeconds() > 6 & timeClient.getSeconds() < 8) {
     if(WT == nowTime){
       digitalWrite(water_pin, HIGH);
+      digitalWrite(water_pin2, HIGH);
     }
   }
 }
@@ -152,18 +156,45 @@ void WATERING(){
       Serial.println(fbdo_ALL.errorReason());
     }
     if (fbdo_ALL.streamAvailable()) {
-      if (fbdo_CT.dataPath() == "/TIME"){
-        if(fbdo_CT.dataType() == "string"){
-          WT = fbdo_CT.stringData();
+      if (fbdo_ALL.dataPath() == "/TIME"){
+        if(fbdo_ALL.dataType() == "string"){
+          WT = fbdo_ALL.stringData();
+          WT.replace(a,"");
           Serial.println("WT now is " + WT);
         } 
       }
-      if (fbdo_ALL.dataPath() == "/esp"){
-        if(fbdo_ALL.dataType() == "string"){
-          if (fbdo_ALL.stringData() == "1") {
-            Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "2");
-          }
+      if (fbdo_ALL.stringData().substring(2, 6) == "TIME"){
+        WT = fbdo_ALL.stringData().substring(9,14);
+        WT.replace("\"", "");
+        WT.replace("\\", "");
+        WT.replace("}", "");
+        Serial.println("WT now is " + WT);
+      } 
+      if (fbdo_ALL.dataPath() == "/WATER"){
+        if (fbdo_ALL.stringData() == "1") {
+          digitalWrite(water_pin, LOW);
+          digitalWrite(water_pin2, LOW);
+        }else if (fbdo_ALL.stringData() == "0") {
+          digitalWrite(water_pin, HIGH);
+          digitalWrite(water_pin2, HIGH);
         }
+      }
+      if (fbdo_ALL.stringData().substring(2, 7) == "WATER"){
+        if(fbdo_STRIP.stringData().substring(10, 11) == "1"){
+          digitalWrite(water_pin, LOW);
+          digitalWrite(water_pin2, LOW);
+        }else if(fbdo_STRIP.stringData().substring(10, 11) == "0"){
+          digitalWrite(water_pin, HIGH);
+          digitalWrite(water_pin2, HIGH);
+        }
+      } 
+      if (fbdo_ALL.dataPath() == "/esp"){
+        if (fbdo_ALL.stringData() == "1") {
+          Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "2");
+        }
+      }
+      if (fbdo_ALL.stringData().substring(2, 5) == "esp"){
+        Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "2");
       }
     }
   }

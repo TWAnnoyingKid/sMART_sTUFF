@@ -218,43 +218,124 @@ void ReadStat() {
           Serial.println("D3 ON");
         }
       }
+      if (fbdo_ALL.dataPath() == "/"){
+        if (fbdo_ALL.stringData().substring(2, 4) == "D1"){
+          if(fbdo_ALL.stringData().substring(7, 8).toInt() == CloseNum){
+            digitalWrite(output1, HIGH);
+            Serial.println("D1 OFF");
+          }else if(fbdo_ALL.stringData().substring(7, 8).toInt() == OnNum){
+            digitalWrite(output1, LOW);
+            Serial.println("D1 ON");
+          }
+        } 
+        if (fbdo_ALL.stringData().substring(2, 4) == "D2"){
+          if(fbdo_ALL.stringData().substring(7, 8) == CloseNum){
+            digitalWrite(output2, HIGH);
+            Serial.println("D2 OFF");
+          }else if(fbdo_ALL.stringData().substring(7, 8) == OnNum){
+            digitalWrite(output2, LOW);
+            Serial.println("D2 ON");
+          }
+        }
+        if (fbdo_ALL.stringData().substring(2, 4) == "D3"){
+          if(fbdo_ALL.stringData().substring(7, 8) == CloseNum){
+            digitalWrite(output3, HIGH);
+            Serial.println("D3 OFF");
+          }else if(fbdo_ALL.stringData().substring(7, 8) == OnNum){
+            digitalWrite(output3, LOW);
+            Serial.println("D3 ON");
+          }
+        }
+      }
       ///////////////////////////////////////////////////////////
       if (fbdo_ALL.dataPath() == "/OT/D1"){
         if(fbdo_ALL.dataType() == "string"){
           D1_TO = fbdo_ALL.stringData();
+          D1_TO.replace(a,"");
           Serial.println("D1_TO now is " + D1_TO);
         } 
       }
       if (fbdo_ALL.dataPath() == "/OT/D2"){
         if(fbdo_ALL.dataType() == "string"){
           D2_TO = fbdo_ALL.stringData();
+          D2_TO.replace(a,"");
           Serial.println("D2_TO now is " + D2_TO);
         } 
       }
       if (fbdo_ALL.dataPath() == "/OT/D3"){
         if(fbdo_ALL.dataType() == "string"){
           D3_TO = fbdo_ALL.stringData();
+          D3_TO.replace(a,"");
           Serial.println("D3_TO now is " + D3_TO);
         } 
+      }
+      if (fbdo_ALL.dataPath() == "/OT"){
+        if (fbdo_ALL.stringData().substring(2, 4) == "D1"){
+          D1_TO = fbdo_ALL.stringData().substring(9,14);
+          D1_TO.replace("\"", "");
+          D1_TO.replace("\\", "");
+          D1_TO.replace("}", "");
+          Serial.println("D1_TO now is " + D1_TO);
+        } 
+        if (fbdo_ALL.stringData().substring(2, 4) == "D2"){
+          D2_TO = fbdo_ALL.stringData().substring(9,14);
+          D2_TO.replace("\"", "");
+          D2_TO.replace("\\", "");
+          D2_TO.replace("}", "");
+          Serial.println("D2_TO now is " + D2_TO);
+        }
+        if (fbdo_ALL.stringData().substring(2, 4) == "D3"){
+          D3_TO = fbdo_ALL.stringData().substring(9,14);
+          D3_TO.replace("\"", "");
+          D3_TO.replace("\\", "");
+          D3_TO.replace("}", "");
+          Serial.println("D3_TO now is " + D3_TO);
+        }
       }
     ///////////////////////////////////////////////////////////
       if (fbdo_ALL.dataPath() == "/CT/D1"){
         if(fbdo_ALL.dataType() == "string"){
           D1_TC = fbdo_CT.stringData();
+          D1_TC.replace(a,"");
           Serial.println("D1_TC now is " + D1_TC);
         } 
       }
       if (fbdo_ALL.dataPath() == "/CT/D2"){
         if(fbdo_ALL.dataType() == "string"){
           D2_TC = fbdo_ALL.stringData();
+          D2_TC.replace(a,"");
           Serial.println("D2_TC now is " + D2_TC);
         } 
       }
       if (fbdo_ALL.dataPath() == "/CT/D3"){
         if(fbdo_ALL.dataType() == "string"){
           D3_TC = fbdo_ALL.stringData();
+          D3_TC.replace(a,"");
           Serial.println("D3_TC now is " + D3_TC);
         } 
+      }
+      if (fbdo_ALL.dataPath() == "/CT"){
+        if (fbdo_ALL.stringData().substring(2, 4) == "D1"){
+          D1_TC = fbdo_ALL.stringData().substring(9,14);
+          D1_TC.replace("\"", "");
+          D1_TC.replace("\\", "");
+          D1_TC.replace("}", "");
+          Serial.println("D1_TC now is " + D1_TC);
+        } 
+        if (fbdo_ALL.stringData().substring(2, 4) == "D2"){
+          D2_TC = fbdo_ALL.stringData().substring(9,14);
+          D2_TC.replace("\"", "");
+          D2_TC.replace("\\", "");
+          D2_TC.replace("}", "");
+          Serial.println("D2_TC now is " + D2_TC);
+        }
+        if (fbdo_ALL.stringData().substring(2, 4) == "D3"){
+          D3_TC = fbdo_ALL.stringData().substring(9,14);
+          D3_TC.replace("\"", "");
+          D3_TC.replace("\\", "");
+          D3_TC.replace("}", "");
+          Serial.println("D3_TC now is " + D3_TC);
+        }
       }
     ///////////////////////////////////////////////////////////
     }
@@ -356,7 +437,7 @@ void Task1code( void * pvParameters ){
 }
 void time(){
   timeClient.update();
-  String nowTime = a + timeClient.getHours() + ":" + timeClient.getMinutes() + a;
+  String nowTime = timeClient.getHours() + ":" + timeClient.getMinutes();
   // Serial.println(nowTime);
   if (timeClient.getSeconds() > 0 & timeClient.getSeconds() < 3) {
     if(D1_TO == nowTime){

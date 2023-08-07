@@ -7,12 +7,6 @@
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
     </head>
     <body>
-        <!-- <div class="SS" onclick="location.href='mainpage.html'">
-            <div style="width:130px">
-                <img src="picture\sloth.png" width="120px" height="120px">  
-            </div>
-            <h1> sMART <br> sTUFF</h1>
-        </div> -->
         <h1 id="NameOfDevice" class="NameOfDevice"></h1>
         <div class="main">
             <div class="center">
@@ -21,19 +15,12 @@
                     <img src="picture\edit.png" alt="Image" width="25px" height="25px" >
                 </button><br>
             </div> 
-            <div class="stat">
-                <div style="width:95px">
-                    <button type="button" id="StatOfD1" class="SW">開啟</button>
-                </div>
-                <div style="width:180px">
-                    <button type="button" id="TimeOnOfD1" class="Time">設定開啟時間</button><br>
-                    <button type="button" id="TimeOffOfD1" class="Time">設定關閉時間</button>
-                </div>
-            </div>
+            <button type="button" id="StatOfD1" class="SW">開啟</button><br>
+            <button type="button" id="TimeOnOfD1" class="Time">設定開啟時間</button>
+            <button type="button" id="TimeOffOfD1" class="Time">設定關閉時間</button><br>
         </div>
         
         <br><br>
-
         <div class="main">
             <div class="center">
                 <h2 id="NameOfD2" class="name"></h2>
@@ -41,19 +28,12 @@
                     <img src="picture\edit.png" alt="Image" width="25px" height="25px" >
                 </button><br>
             </div>
-            <div class="stat">
-                <div style="width:95px">
-                    <button type="button" id="StatOfD2" class="SW">開啟</button>
-                </div>
-                <div style="width:180px">
-                    <button type="button" id="TimeOnOfD2" class="Time">設定開啟時間</button><br>
-                    <button type="button" id="TimeOffOfD2" class="Time">設定關閉時間</button>
-                </div>
-            </div>
+            <button type="button" id="StatOfD2" class="SW">開啟</button><br>
+            <button type="button" id="TimeOnOfD2" class="Time">設定開啟時間</button>
+            <button type="button" id="TimeOffOfD2" class="Time">設定關閉時間</button><br>
         </div>
         
         <br><br>
-
         <div class="main">
             <div class="center">
                 <h2 id="NameOfD3" class="name"></h2>
@@ -61,21 +41,15 @@
                     <img src="picture\edit.png" alt="Image" width="25px" height="25px" >
                 </button><br>
             </div>
-            <div class="stat">
-                <div style="width:95px">
-                    <button type="button" id="StatOfD3" class="SW">開啟</button>
-                </div>
-                <div style="width:180px">
-                    <button type="button" id="TimeOnOfD3" class="Time">設定開啟時間</button><br>
-                    <button type="button" id="TimeOffOfD3" class="Time">設定關閉時間</button>
-                </div>
-            </div>
+            <button type="button" id="StatOfD3" class="SW">開啟</button><br>
+            <button type="button" id="TimeOnOfD3" class="Time">設定開啟時間</button>
+            <button type="button" id="TimeOffOfD3" class="Time">設定關閉時間</button><br>
+            
         </div>
-        
         <br><br><br>
         <div class="goBackDevicePage">
             <a href="devicepage.html">
-                <button type="button" id="back" class="back">回到裝置頁</button><br>
+                <button type="button" id="back" class="Time">回到裝置頁</button><br>
             </a>
         </div>
         
@@ -190,17 +164,6 @@
             <button onclick="TCD3Set.close()">取消</button>
         </dialog>
 
-        <dialog id="HourSetWrong">
-            <h1>Hour 輸入出現問題</h1>
-            <p>Hour 設定範圍為 '0~23'</p>
-            <button onclick="HourSetWrong.close()">確定</button>
-        </dialog>
-        <dialog id="MinSetWrong">
-            <h1>Minute 輸入出現問題</h1>
-            <p>Minute 設定範圍為 '0~59'</p>
-            <button onclick="MinSetWrong.close()">確定</button>
-        </dialog>
-
         <script type="module">
             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
 
@@ -221,10 +184,6 @@
             const deviceName = Cookies.get('device');
             var NameOfDevice = document.querySelector('#NameOfDevice')
             var MAC = deviceName.split(",")[1]
-            const Today = new Date()
-            const hour = Today.getHours().toLocaleString('zh-TW', {timeZone: 'Asia/Taipei'})
-            const minutes = Today.getMinutes().toLocaleString('zh-TW', {timeZone: 'Asia/Taipei'})
-            
             const getD1 = ref(db, MAC + '/D1')
             const getD2 = ref(db, MAC + '/D2')
             const getD3 = ref(db, MAC + '/D3')
@@ -291,8 +250,6 @@
             var TCD1min = document.querySelector('#TCD1min')
             var TCD2min = document.querySelector('#TCD2min')
             var TCD3min = document.querySelector('#TCD3min')
-            var HourSetWrong = document.querySelector('#HourSetWrong')
-            var MinSetWrong = document.querySelector('#MinSetWrong')
 
             NameOfDevice.innerHTML = deviceName.split(",")[0]
             NameOfD1.innerHTML = deviceName.split(",")[3]
@@ -329,18 +286,7 @@
                 if (snapshot.val() == '0'){
                     TimeOnOfD1.innerHTML = '設定開啟時間'
                 }else{
-                    var D1OTimeHR = snapshot.val().replace('"', "").replace('"', "").split(":")[0]
-                    var D1OTimeMIN = snapshot.val().replace('"', "").replace('"', "").split(":")[1]
-                    if (D1OTimeHR <= 9 && D1OTimeMIN <= 9){
-                        var D1Otime = "0" + D1OTimeHR + ":0" + D1OTimeMIN 
-                    }else if(D1OTimeHR <= 9){
-                        var D1Otime = D1OTimeHR + ":" + D1OTimeMIN
-                    }else if(D1OTimeMIN <= 9){
-                        var D1Otime = D1OTimeHR + ":0" + D1OTimeMIN
-                    }else{
-                        var D1Otime = D1OTimeHR + ":" + D1OTimeMIN
-                    }
-                    TimeOnOfD1.innerHTML = '已設定' + D1Otime + '開啟'
+                    TimeOnOfD1.innerHTML = '已設定' + snapshot.val().replace('"', "").replace('"', "") + '開啟'
                 }
             })
             onValue(getD2OT, (snapshot) => {
@@ -348,18 +294,7 @@
                 if (snapshot.val() == '0'){
                     TimeOnOfD2.innerHTML = '設定開啟時間'
                 }else{
-                    var D2OTimeHR = snapshot.val().replace('"', "").replace('"', "").split(":")[0]
-                    var D2OTimeMIN = snapshot.val().replace('"', "").replace('"', "").split(":")[1]
-                    if (D2OTimeHR <= 9 && D2OTimeMIN <= 9){
-                        var D2Otime = "0" + D2OTimeHR + ":0" + D2OTimeMIN 
-                    }else if(D2OTimeHR <= 9){
-                        var D2Otime = D2OTimeHR + ":" + D2OTimeMIN
-                    }else if(D2OTimeMIN <= 9){
-                        var D2Otime = D2OTimeHR + ":0" + D2OTimeMIN
-                    }else{
-                        var D2Otime = D2OTimeHR + ":" + D2OTimeMIN
-                    }
-                    TimeOnOfD2.innerHTML = '已設定' + D2Otime + '開啟'
+                    TimeOnOfD2.innerHTML = '已設定' + snapshot.val().replace('"', "").replace('"', "") + '開啟'
                 }
             })
             onValue(getD3OT, (snapshot) => {
@@ -367,18 +302,7 @@
                 if (snapshot.val() == '0'){
                     TimeOnOfD3.innerHTML = '設定開啟時間'
                 }else{
-                    var D3OTimeHR = snapshot.val().replace('"', "").replace('"', "").split(":")[0]
-                    var D3OTimeMIN = snapshot.val().replace('"', "").replace('"', "").split(":")[1]
-                    if (D3OTimeHR <= 9 && D3OTimeMIN <= 9){
-                        var D3Otime = "0" + D3OTimeHR + ":0" + D3OTimeMIN 
-                    }else if(D3OTimeHR <= 9){
-                        var D3Otime = D3OTimeHR + ":" + D3OTimeMIN
-                    }else if(D3OTimeMIN <= 9){
-                        var D3Otime = D3OTimeHR + ":0" + D3OTimeMIN
-                    }else{
-                        var D3Otime = D3OTimeHR + ":" + D3OTimeMIN
-                    }
-                    TimeOnOfD3.innerHTML = '已設定' + D3Otime + '開啟'
+                    TimeOnOfD3.innerHTML = '已設定' + snapshot.val().replace('"', "").replace('"', "") + '開啟'
                 }
             })
 
@@ -387,18 +311,7 @@
                 if (snapshot.val() == '0'){
                     TimeOffOfD1.innerHTML = '設定關閉時間'
                 }else{
-                    var D1CTimeHR = snapshot.val().replace('"', "").replace('"', "").split(":")[0]
-                    var D1CTimeMIN = snapshot.val().replace('"', "").replace('"', "").split(":")[1]
-                    if (D1CTimeHR <= 9 && D1CTimeMIN <= 9){
-                        var D1Ctime = "0" + D1CTimeHR + ":0" + D1CTimeMIN 
-                    }else if(D1CTimeHR <= 9){
-                        var D1Ctime = D1CTimeHR + ":" + D1CTimeMIN
-                    }else if(D1CTimeMIN <= 9){
-                        var D1Ctime = D1CTimeHR + ":0" + D1CTimeMIN
-                    }else{
-                        var D1Ctime = D1CTimeHR + ":" + D1CTimeMIN
-                    }
-                    TimeOffOfD1.innerHTML = '已設定' + D1Ctime + '關閉'
+                    TimeOffOfD1.innerHTML = '已設定' + snapshot.val().replace('"', "").replace('"', "") + '關閉'
                 }
             })
             onValue(getD2CT, (snapshot) => {
@@ -406,18 +319,7 @@
                 if (snapshot.val() == '0'){
                     TimeOffOfD2.innerHTML = '設定關閉時間'
                 }else{
-                    var D2CTimeHR = snapshot.val().replace('"', "").replace('"', "").split(":")[0]
-                    var D2CTimeMIN = snapshot.val().replace('"', "").replace('"', "").split(":")[1]
-                    if (D2CTimeHR <= 9 && D2CTimeMIN <= 9){
-                        var D2Ctime = "0" + D2CTimeHR + ":0" + D2CTimeMIN 
-                    }else if(D2CTimeHR <= 9){
-                        var D2Ctime = D2CTimeHR + ":" + D2CTimeMIN
-                    }else if(D2CTimeMIN <= 9){
-                        var D2Ctime = D2CTimeHR + ":0" + D2CTimeMIN
-                    }else{
-                        var D2Ctime = D2CTimeHR + ":" + D2CTimeMIN
-                    }
-                    TimeOffOfD2.innerHTML = '已設定' + D2Ctime + '關閉'
+                    TimeOffOfD2.innerHTML = '已設定' + snapshot.val().replace('"', "").replace('"', "") + '關閉'
                 }
             })
             onValue(getD3CT, (snapshot) => {
@@ -425,34 +327,20 @@
                 if (snapshot.val() == '0'){
                     TimeOffOfD3.innerHTML = '設定關閉時間'
                 }else{
-                    var D3CTimeHR = snapshot.val().replace('"', "").replace('"', "").split(":")[0]
-                    var D3CTimeMIN = snapshot.val().replace('"', "").replace('"', "").split(":")[1]
-                    if (D3CTimeHR <= 9 && D3CTimeMIN <= 9){
-                        var D3Ctime = "0" + D3CTimeHR + ":0" + D3CTimeMIN 
-                    }else if(D3CTimeHR <= 9){
-                        var D3Ctime = D3CTimeHR + ":" + D3CTimeMIN
-                    }else if(D3CTimeMIN <= 9){
-                        var D3Ctime = D3CTimeHR + ":0" + D3CTimeMIN
-                    }else{
-                        var D3Ctime = D3CTimeHR + ":" + D3CTimeMIN
-                    }
-                    TimeOffOfD3.innerHTML = '已設定' + D3Ctime + '關閉'
+                    TimeOffOfD3.innerHTML = '已設定' + snapshot.val().replace('"', "").replace('"', "") + '關閉'
                 }
             })
-
-            let open = "1"
-            let close = "0"
 
             function ChangeD1(){
                 if(StatOfD1.innerHTML == '關閉'){
                     StatOfD1.innerHTML = '開啟'
                     update(ref(db, MAC),{
-                        D1: open
+                        D1: 1
                     })
                 }else if(StatOfD1.innerHTML == '開啟'){
                     StatOfD1.innerHTML = '關閉'
                     update(ref(db, MAC),{
-                        D1: close
+                        D1: 0
                     })
                 }
             }
@@ -460,12 +348,12 @@
                 if(StatOfD2.innerHTML == '關閉'){
                     StatOfD2.innerHTML = '開啟'
                     update(ref(db, MAC),{
-                        D2: open
+                        D2: 1
                     })
                 }else if(StatOfD2.innerHTML == '開啟'){
                     StatOfD2.innerHTML = '關閉'
                     update(ref(db, MAC),{
-                        D2: close
+                        D2: 0
                     })
                 }
             }
@@ -473,19 +361,17 @@
                 if(StatOfD3.innerHTML == '關閉'){
                     StatOfD3.innerHTML = '開啟'
                     update(ref(db, MAC),{
-                        D3: open
+                        D3: 1
                     })
                 }else if(StatOfD3.innerHTML == '開啟'){
                     StatOfD3.innerHTML = '關閉'
                     update(ref(db, MAC),{
-                        D3: close
+                        D3: 0
                     })
                 }
             }
 
             function AskD1OT(){
-                TOD1hr.value = hour
-                TOD1min.value = minutes
                 if(TimeOnOfD1.innerHTML == '設定開啟時間'){
                     TOD1Set.showModal()
                 }else{
@@ -493,8 +379,6 @@
                 }
             }
             function AskD2OT(){
-                TOD2hr.value = hour
-                TOD2min.value = minutes
                 if(TimeOnOfD2.innerHTML == '設定開啟時間'){
                     TOD2Set.showModal()
                 }else{
@@ -502,8 +386,6 @@
                 }
             }
             function AskD3OT(){
-                TOD3hr.value = hour
-                TOD3min.value = minutes
                 if(TimeOnOfD3.innerHTML == '設定開啟時間'){
                     TOD3Set.showModal()
                 }else{
@@ -513,68 +395,70 @@
 
             function ResetD1OT(){
                 update(ref(db, MAC + '/OT'),{
-                    D1: close
+                    D1: 0
                 })
                 TOD1Check.close()
             }
             function ResetD2OT(){
                 update(ref(db, MAC + '/OT'),{
-                    D2: close
+                    D2: 0
                 })
                 TOD2Check.close()
             }
             function ResetD3OT(){
-                update(ref(db, MAC + '/OT'), {
-                    D3: close
+                update(ref(db, MAC + '/OT'),{
+                    D3: 0
                 })
                 TOD3Check.close()
             }
 
             function SetD1OT(){
-                if ( TOD1hr.value >= 24 || TOD1hr.value < 0){
-                    HourSetWrong.showModal()
-                }else if ( TOD1min.value > 59 || TOD1min.value < 0){
-                    MinSetWrong.showModal()
+                if (TOD1hr.value <= 9 && TOD1min.value <= 9){
+                    var time = '"0' + TOD1hr.value + ":0" + TOD1min.value + '"'
+                }else if(TOD1hr.value <= 9){
+                    var time = '"0' + TOD1hr.value + ":" + TOD1min.value + '"'
+                }else if(TOD1min.value <= 9){
+                    var time = '"' + TOD1hr.value + ":0" + TOD1min.value + '"'
                 }else{
                     var time = '"' + TOD1hr.value + ":" + TOD1min.value + '"'
-                    update(ref(db, MAC + '/OT'),{
-                        D1: time
-                    })
-                    TOD1Set.close() 
                 }
-                
+                update(ref(db, MAC + '/OT'),{
+                    D1: time
+                })
+                TOD1Set.close()
             }
             function SetD2OT(){
-                if ( TOD2hr.value >= 24 || TOD2hr.value < 0){
-                    HourSetWrong.showModal()
-                }else if ( TOD2min.value > 59 || TOD2min.value < 0){
-                    MinSetWrong.showModal()
+                if (TOD2hr.value <= 9 && TOD2min.value <= 9){
+                    var time = '"0' + TOD2hr.value + ":0" + TOD2min.value + '"'
+                }else if(TOD2hr.value <= 9){
+                    var time = '"0' + TOD2hr.value + ":" + TOD2min.value + '"'
+                }else if(TOD2min.value <= 9){
+                    var time = '"' + TOD2hr.value + ":0" + TOD2min.value + '"'
                 }else{
                     var time = '"' + TOD2hr.value + ":" + TOD2min.value + '"'
-                    update(ref(db, MAC + '/OT'),{
-                        D2: time
-                    })
-                    TOD2Set.close()
                 }
+                update(ref(db, MAC + '/OT'),{
+                    D2: time
+                })
+                TOD2Set.close()
             }
             function SetD3OT(){
-                if ( TOD3hr.value >= 24 || TOD3hr.value < 0){
-                    HourSetWrong.showModal()
-                }else if ( TOD3min.value > 59 || TOD3min.value < 0){
-                    MinSetWrong.showModal()
+                if (TOD3hr.value <= 9 && TOD3min.value <= 9){
+                    var time = '"0' + TOD3hr.value + ":0" + TOD3min.value + '"'
+                }else if(TOD3hr.value <= 9){
+                    var time = '"0' + TOD3hr.value + ":" + TOD3min.value + '"'
+                }else if(TOD3min.value <= 9){
+                    var time = '"' + TOD3hr.value + ":0" + TOD3min.value + '"'
                 }else{
                     var time = '"' + TOD3hr.value + ":" + TOD3min.value + '"'
-                    update(ref(db, MAC + '/OT'),{
-                        D3: time
-                    })
-                    TOD3Set.close()
                 }
-                
+                update(ref(db, MAC + '/OT'),{
+                    D3: time
+                })
+                TOD3Set.close()
             }
 
             function AskD1CT(){
-                TCD1hr.value = hour
-                TCD1min.value = minutes
                 if(TimeOffOfD1.innerHTML == '設定關閉時間'){
                     TCD1Set.showModal()
                 }else{
@@ -582,8 +466,6 @@
                 }
             }
             function AskD2CT(){
-                TCD2hr.value = hour
-                TCD2min.value = minutes
                 if(TimeOffOfD2.innerHTML == '設定關閉時間'){
                     TCD2Set.showModal()
                 }else{
@@ -591,8 +473,6 @@
                 }
             }
             function AskD3CT(){
-                TCD3hr.value = hour
-                TCD3min.value = minutes
                 if(TimeOffOfD3.innerHTML == '設定關閉時間'){
                     TCD3Set.showModal()
                 }else{
@@ -602,64 +482,67 @@
 
             function ResetD1CT(){
                 update(ref(db, MAC + '/CT'),{
-                    D1: close
+                    D1: 0
                 })
                 TCD1Check.close()
             }
             function ResetD2CT(){
                 update(ref(db, MAC + '/CT'),{
-                    D2: close
+                    D2: 0
                 })
                 TCD2Check.close()
             }
             function ResetD3CT(){
                 update(ref(db, MAC + '/CT'),{
-                    D3: close
+                    D3: 0
                 })
                 TCD3Check.close()
             }
 
             function SetD1CT(){
-                if ( TCD1hr.value >= 24 || TCD1hr.value < 0){
-                    HourSetWrong.showModal()
-                }else if ( TCD1min.value > 59 || TCD1min.value < 0){
-                    MinSetWrong.showModal()
+                if (TCD1hr.value <= 9 && TCD1min.value <= 9){
+                    var time = '"0' + TCD1hr.value + ":0" + TCD1min.value + '"'
+                }else if(TCD1hr.value <= 9){
+                    var time = '"0' + TCD1hr.value + ":" + TCD1min.value + '"'
+                }else if(TCD1min.value <= 9){
+                    var time = '"' + TCD1hr.value + ":0" + TCD1min.value + '"'
                 }else{
                     var time = '"' + TCD1hr.value + ":" + TCD1min.value + '"'
-                    update(ref(db, MAC + '/CT'),{
-                        D1: time
-                    })
-                    TCD1Set.close()
                 }
-                
+                update(ref(db, MAC + '/CT'),{
+                    D1: time
+                })
+                TCD1Set.close()
             }
             function SetD2CT(){
-                if ( TCD2hr.value >= 24 || TCD2hr.value < 0){
-                    HourSetWrong.showModal()
-                }else if ( TCD2min.value > 59 || TCD2min.value < 0){
-                    MinSetWrong.showModal()
+                if (TCD2hr.value <= 9 && TCD2min.value <= 9){
+                    var time = '"0' + TCD2hr.value + ":0" + TCD2min.value + '"'
+                }else if(TCD2hr.value <= 9){
+                    var time = '"0' + TCD2hr.value + ":" + TCD2min.value + '"'
+                }else if(TCD2min.value <= 9){
+                    var time = '"' + TCD2hr.value + ":0" + TCD2min.value + '"'
                 }else{
                     var time = '"' + TCD2hr.value + ":" + TCD2min.value + '"'
-                    update(ref(db, MAC + '/CT'),{
-                        D2: time
-                    })
-                    TCD2Set.close()
                 }
-                
+                update(ref(db, MAC + '/CT'),{
+                    D2: time
+                })
+                TCD2Set.close()
             }
             function SetD3CT(){
-                if ( TCD3hr.value >= 24 || TCD3hr.value < 0){
-                    HourSetWrong.showModal()
-                }else if ( TCD3min.value > 59 || TCD3min.value < 0){
-                    MinSetWrong.showModal()
+                if (TCD3hr.value <= 9 && TCD3min.value <= 9){
+                    var time = '"0' + TCD3hr.value + ":0" + TCD3min.value + '"'
+                }else if(TCD3hr.value <= 9){
+                    var time = '"0' + TCD3hr.value + ":" + TCD3min.value + '"'
+                }else if(TCD3min.value <= 9){
+                    var time = '"' + TCD3hr.value + ":0" + TCD3min.value + '"'
                 }else{
                     var time = '"' + TCD3hr.value + ":" + TCD3min.value + '"'
-                    update(ref(db, MAC + '/CT'),{
-                        D3: time
-                    })
-                    TCD3Set.close()
                 }
-                
+                update(ref(db, MAC + '/CT'),{
+                    D3: time
+                })
+                TCD3Set.close()
             }
 
             function ChangeD1Name(){

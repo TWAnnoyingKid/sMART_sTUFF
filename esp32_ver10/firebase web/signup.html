@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+    <head class="head">
+        <title>sIGN UP</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="style.css">
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    </head>
+    <body>
+        <div class="SS">
+            <h1 > sMART <img src="picture\sloth.png" width="70px" height="70px"> sTUFF</h1>
+        </div>
+        <h1> sIGN UP</h1>
+        <h2> 帳號 </h2>
+        <input id="account">
+        <h2> 密碼 </h2>
+        <input type="password" id="password">
+        <h2> 確認密碼 </h2>
+        <input type="password" id="confirmpassword">
+        <h2> EMAIL </h2>
+        <input id="email">
+        <h2> 電話號碼 </h2>
+        <input id="phone"><br><br>
+        <button type="button" id="signup">註冊</button>
+        <a href="mainpage.html">
+            <button type="button" id="back">回到主頁面</button><br>
+        </a>
+
+        <dialog id="dataFail">
+            <p>請輸入完整資料</p>
+            <button id="close" onclick="dataFail.close()">close</button>
+        </dialog>
+        <dialog id="passwordFail">
+            <p>密碼不相同</p>
+            <button id="close" onclick="passwordFail.close()">close</button>
+        </dialog>
+        <dialog id="accountFail">
+            <p>註冊失敗, 帳號已被註冊</p>
+            <button id="close" onclick="accountFail.close()">close</button>
+        </dialog>
+        <dialog id="emailFail">
+            <p>註冊失敗, 信箱已被註冊</p>
+            <button id="close" onclick="emailFail.close()">close</button>
+        </dialog>
+        <dialog id="phoneFail">
+            <p>註冊失敗, 電話號碼已被註冊</p>
+            <button id="close" onclick="phoneFail.close()">close</button>
+        </dialog>
+        <dialog id="sus">
+            <p>帳號創建成功</p>
+            <button id="close" onclick="sus.close()">close</button>
+        </dialog>
+        
+
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
+            import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-analytics.js";
+            const firebaseConfig = {
+              apiKey: "AIzaSyD0UmlJNoacdrBfyZ50h0FyEI0yHKWUwBs",
+              authDomain: "user-data-2e9be.firebaseapp.com",
+              databaseURL: "https://user-data-2e9be-default-rtdb.firebaseio.com",
+              projectId: "user-data-2e9be",
+              storageBucket: "user-data-2e9be.appspot.com",
+              messagingSenderId: "261163235969",
+              appId: "1:261163235969:web:c60872f373060f75cb2b80",
+              measurementId: "G-2X855JVZ8V"
+            };
+          
+            const app = initializeApp(firebaseConfig);
+            const analytics = getAnalytics(app);
+
+            import { getDatabase, set, get, update, remove, ref, child } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-database.js";
+            const db = getDatabase();
+
+            var account = document.querySelector("#account");
+            var password = document.querySelector("#password");
+            var confirmpassword = document.querySelector("#confirmpassword");
+            var email = document.querySelector("#email");
+            var phone = document.querySelector("#phone");
+            var signupBtn = document.querySelector("#signup");
+
+            var dataFail = document.querySelector('#dataFail')
+            var passwordFail = document.querySelector('#passwordFail')
+            var accountFail = document.querySelector('#accountFail')
+            var emailFail = document.querySelector('#emailFail')
+            var phoneFail = document.querySelector('#phoneFail')
+            var sus = document.querySelector('#sus')
+            var close = document.querySelector('#close');
+
+            function signupData(){
+                const dbref = ref(db);
+                if(account.value == "" || password.value == "" || confirmpassword.value == "" || email.value == "" || phone.value == ""){
+                    dataFail.showModal()
+                }
+                else if(password.value != confirmpassword.value){
+                    passwordFail.showModal()
+                }
+                else{
+                    get(child(dbref, "UserData/使用者" + account.value))
+                    .then((snapshot)=>{
+                        if (snapshot.exists()) {
+                            accountFail.showModal()
+                        }else{
+                            var emaildb = email.value.replace('@', '').replace('.', '')
+                            get(child(dbref, "Email/" + emaildb))
+                            .then((snapshot)=>{
+                                if (snapshot.exists()){
+                                    emailFail.showModal()
+                                }else{
+                                    var phonedb = phone.value
+                                    get(child(dbref, "Phone/" + phonedb))
+                                    .then((snapshot)=>{
+                                        if (snapshot.exists()){
+                                            phoneFail.showModal()
+                                        }else{
+                                            set(ref(db, "UserData/使用者" + account.value),{
+                                                account: '"' + account.value + '"',
+                                                password: '"' + password.value + '"',
+                                                email: '"' + email.value + '"',
+                                                phone: '"' + phone.value + '"'
+                                            })
+                                            set(ref(db, "Email/" + emaildb),{
+                                                Setup: "true"
+                                            })
+                                            set(ref(db, "Phone/" + phonedb),{
+                                                Setup: "true"
+                                            })
+                                            .then(()=>{
+                                                sus.showModal()
+                                                window.location.href = "mainpage.html"
+                                            })
+                                        }
+                                    })
+                                }
+
+                            })
+                            
+                        }
+                    })
+                }
+            }
+            signupBtn.addEventListener('click', signupData)
+          </script>
+    </body>
+</html>
