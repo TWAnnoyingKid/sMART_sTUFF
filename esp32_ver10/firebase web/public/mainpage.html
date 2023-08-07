@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html class="head">
+    <head>
+        <title>MainPage</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="style.css">
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    </head>
+    <body>
+        <div class="SS">
+            <div style="width:130px">
+                <img src="picture\sloth.png" width="120px" height="120px">  
+            </div>
+            <h1> sMART <br> sTUFF</h1>
+        </div>
+        <br>
+        <br>
+        <br>
+        <div style="width: 270px; margin:0px auto;">
+            <h2 id="welcome" style="display: inline;"></h2>
+            <h2 id="username" style="display: inline;"></h2><br>
+            <div style="width: 185px; margin:0px auto;">
+                <button type="button" id="login" class="Time" onclick="location.href='login.html'">登入</button>
+                <h4 id="noaccount" style="display:inline">沒有帳號嗎?
+                    <a href="signup.html" id="signup">註冊</a>
+                </h4>
+                <br>
+                <br>
+                <button type="button" id="device" class="Time" onclick="location.href='devicepage.html'">查看擁有的裝置</button><br>
+                <button type="button" id="logout" class="Time">登出</button><br>
+                
+            </div>
+        </div>
+        
+        
+
+        <div id="deviceplce"></div>
+        
+        <script>
+            const user = Cookies.get('user');
+            var logout = document.querySelector("#logout");
+            var username = document.querySelector("#username");
+            var welcome = document.querySelector("#welcome");
+
+            if (user != undefined){
+                welcome.innerHTML = "歡迎! 使用者";
+                username.innerHTML =user;
+                document.getElementById("login").style.display='none'
+                document.getElementById("logout").style.display='block'
+                document.getElementById("signup").style.display='none'
+                document.getElementById("noaccount").style.display='none'
+                document.getElementById("device").style.display='block'
+                
+            }else{
+                document.getElementById("login").style.display='block'
+                document.getElementById("logout").style.display='none'
+                document.getElementById("signup").style.display='inline-block'
+                document.getElementById("noaccount").style.display='block'
+                document.getElementById("device").style.display='none'
+                
+            }
+
+            function out() {
+                Cookies.remove('user')
+                window.location.href = "mainpage.html"
+            }
+
+            logout.addEventListener('click', out)
+        </script>
+    </body>
+</html>
