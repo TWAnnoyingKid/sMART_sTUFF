@@ -1,26 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html  class="head">
     <head>
         <title id="Title">BME</title>
         <meta charset="UTF-8">
+        <link rel="stylesheet" href="style.css">
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
     </head>
     <body>
-        <h1 id="NameOfDevice"></h1>
-        <h2>目前土壤濕度：</h2>
-        <h2 id="humid"></h2>
-        <button id="water">澆水</button><br><br>
-        <button id="waterTime">定時澆水</button><br><br>
-        <button id="humidHigh">最高濕度</button>
-        <button id="humidLow">最低濕度</button><br><br>
+        <h1 id="NameOfDevice"  class="NameOfDevice"></h1>
+        <h2 id="humidTAG" style="display:inline"></h2>
+        <h2 id="humid" style="display:inline"></h2><br>
+        <div style="width: 205px;margin:0px auto;">
+            <button id="water" class="moi">澆水</button><br><br>
+            <button id="waterTime" class="moi">定時澆水</button><br><br>
+            <button id="humidHigh" class="humidBTN">最高濕度</button>
+            <button id="humidLow" class="humidBTN">最低濕度</button><br><br>
+        </div>
+        <br><br><br>
+        <div class="goBackDevicePage">
+            <a href="devicepage.html">
+                <button type="button" id="back" class="back">回到裝置頁</button><br>
+            </a>
+        </div>
 
-        <a href="devicepage.html">
-            <button type="button" id="back">回到裝置頁</button><br>
-        </a><br>
+        <dialog id="WTCheck">
+            <h1>是否更改澆水時間?</h1>
+            <button id="WTconfirm">確認</button>
+            <button onclick="WTCheck.close()">取消</button>
+        </dialog>
+        <dialog id="WTSet"> 
+            <h1>設定澆水時間</h1>
+            <input id="WThr" type="number" min="0" max="23">
+            時 : 
+            <input id="WTmin" type="number" min="0" max="59">
+            分
+            <button id="WTSetconfirm">確認</button>
+            <button onclick="WTSet.close()">取消</button>
+        </dialog>
+        <dialog id="HourSetWrong">
+            <h1>Hour 輸入出現問題</h1>
+            <p>Hour 設定範圍為 '0~23'</p>
+            <button onclick="HourSetWrong.close()">確定</button>
+        </dialog>
+        <dialog id="MinSetWrong">
+            <h1>Minute 輸入出現問題</h1>
+            <p>Minute 設定範圍為 '0~59'</p>
+            <button onclick="MinSetWrong.close()">確定</button>
+        </dialog>
 
         <script type="module">
             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
-
             const firebaseConfig = {
               apiKey: "AIzaSyAF4OdtYUAomk_4WnvE5MXb_nphlQ33UyA",
               authDomain: "esp8266-ai2.firebaseapp.com",
@@ -29,10 +58,9 @@
               storageBucket: "esp8266-ai2.appspot.com",
               messagingSenderId: "245671703015",
               appId: "1:245671703015:web:28612316e5ec39dd6bcd42"
-            };
-
+            }; 
             const app = initializeApp(firebaseConfig);
-            import { getDatabase, set, get, update, remove, ref, onValue } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-database.js";
+            import { getDatabase, set, get, update, remove, ref, onValue, child } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-database.js";
             const db = getDatabase();
             const deviceName = Cookies.get('device');
 
@@ -40,10 +68,90 @@
             var MAC = deviceName.split(",")[1]
             NameOfDevice.innerHTML = deviceName.split(",")[0]
             var humid = document.querySelector('#humid')
+            var humidTAG = document.querySelector('#humidTAG')
             var water = document.querySelector('#water')
             var waterTime = document.querySelector('#waterTime')
             var humidHigh = document.querySelector('#humidHigh')
             var humidLow = document.querySelector('#humidLow')
+            var HourSetWrong = document.querySelector('#HourSetWrong')
+            var MinSetWrong = document.querySelector('#MinSetWrong')
+            var WTCheck = document.querySelector('#WTCheck')
+            var WTconfirm = document.querySelector('#WTconfirm')
+            var WTSet = document.querySelector('#WTSet')
+            var WThr = document.querySelector('#WThr')
+            var WTmin = document.querySelector('#WTmin')
+            var WTSetconfirm = document.querySelector('#WTSetconfirm')
+
+            const Today = new Date()
+            const hour = Today.getHours().toLocaleString('zh-TW', {timeZone: 'Asia/Taipei'})
+            const minutes = Today.getMinutes().toLocaleString('zh-TW', {timeZone: 'Asia/Taipei'})
+
+            const MOI = ref(db, MAC + "/Moisture")
+            const WTIMESet = ref(db, MAC + "/TIME")
+
+
+            onValue(MOI, (snapshot) => {
+                if(snapshot.val() != "0" && snapshot.val() != null){
+                    humidTAG.innerHTML = '目前土壤濕度：'
+                    humid.innerHTML = snapshot.val() + '%'
+                }else{
+                    humidTAG.innerHTML = ''
+                    humid.innerHTML = ''
+                }
+            })
+            onValue(WTIMESet, (snapshot) => {
+                if(snapshot.val() == '0' || snapshot.val() == null){
+                    waterTime.innerHTML = '定時澆水'
+                }else{
+                    var TimeHR = snapshot.val().replace('"', "").replace('"', "").split(":")[0]
+                    var TimeMIN = snapshot.val().replace('"', "").replace('"', "").split(":")[1]
+                    if (TimeHR <= 9 && TimeMIN <= 9){
+                        var Wtime = "0" + TimeHR + ":0" + TimeMIN 
+                    }else if(TimeHR <= 9){
+                        var Wtime = TimeHR + ":" + TimeMIN
+                    }else if(TimeMIN <= 9){
+                        var Wtime = TimeHR + ":0" + TimeMIN
+                    }else{
+                        var Wtime = TimeHR + ":" + TimeMIN
+                    }
+                    waterTime.innerHTML = '已設定 ' + Wtime + ' 澆水'
+                }
+            })
+            
+            function WTBTNSET(){
+                WThr.value = hour
+                WTmin.value = minutes
+                if(waterTime.innerHTML == '定時澆水'){
+                    WTSet.showModal()
+                }else{
+                    WTCheck.showModal()
+                }
+            }
+            function ResetWT(){
+                update(ref(db, MAC),{
+                    TIME: "0"
+                })
+                WTCheck.close()
+            }
+            function SetWT(){
+                if ( WThr.value >= 24 || WThr.value < 0){
+                    HourSetWrong.showModal()
+                }else if ( WTmin.value > 59 || WTmin.value < 0){
+                    MinSetWrong.showModal()
+                }else{
+                    var time = '"' + WThr.value + ":" + WTmin.value + '"'
+                    update(ref(db, MAC),{
+                        TIME: time
+                    })
+                    WTSet.close()
+                }
+            }
+
+            waterTime.addEventListener('click',WTBTNSET)
+            WTSetconfirm.addEventListener('click',SetWT)
+            WTconfirm.addEventListener('click',ResetWT)
+
+
           </script>
     </body>
 </html>

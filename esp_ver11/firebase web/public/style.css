@@ -108,3 +108,15 @@ button[name=devices]{
     font-size: 20px; 
     font-weight:700;
 }
+.moi{
+    width :205px;
+    height : 35px;
+    font-size: 20px; 
+    font-weight:700;  
+}
+.humidBTN{
+    width :100px;
+    height : 35px;
+    font-size: 20px; 
+    font-weight:700;  
+}
