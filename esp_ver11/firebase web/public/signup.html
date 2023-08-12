@@ -111,7 +111,7 @@
                         if (snapshot.exists()) {
                             accountFail.showModal()
                         }else{
-                            var emaildb = email.value.replace('@', '').replace('.', '')
+                            var emaildb = email.value.replace('@', '').replace('.', '').replace('.', '').replace('.', '').replace('.', '').replace('.', '').replace('.', '')
                             get(child(dbref, "Email/" + emaildb))
                             .then((snapshot)=>{
                                 if (snapshot.exists()){

@@ -111,10 +111,10 @@ void setup() {
 
   WiFiManager wifiManager;
   // wifiManager.resetSettings();
-  if (digitalRead(rs) == LOW) {
-    wifiManager.resetSettings();
-    LED_RESET = "ON";
-  }
+  // if (digitalRead(rs) == LOW) {
+  //   wifiManager.resetSettings();
+  //   LED_RESET = "ON";
+  // }
   wifiManager.autoConnect("sMART sTUFF");
   lcd.clear();
   lcd.setCursor(0,0);
@@ -181,7 +181,6 @@ void loop() {
   }
 }
 void sro4(){
-  Serial.println(digitalRead(D0));
   if (digitalRead(D0) == 0){
     if(gate_stat == "close" ){
       digitalWrite(open_gate, HIGH);
@@ -190,14 +189,12 @@ void sro4(){
       digitalWrite(open_gate, LOW);
       digitalWrite(close_gate, HIGH);
       // gate_stat="open";
-      // Firebase.RTDB.setString(&fbdo_ALL, STAT1, 0);
       open_time_saving();
     }
     else if(gate_stat == "open" ){
       digitalWrite(open_gate, LOW);
       digitalWrite(close_gate, HIGH);
       gate_stat="close";
-      Firebase.RTDB.setString(&fbdo_ALL, STAT1, 0);
       open_time_saving();
     }
   }
@@ -235,6 +232,8 @@ void dump_byte_array(byte *readCard, byte readCardSize) {
     digitalWrite(open_gate, LOW);
     digitalWrite(close_gate, HIGH);
     open_time_saving();
+    Firebase.RTDB.setString(&fbdo_ALL, STAT1, CloseNum);
+    
   }
   else if (Firebase.RTDB.getString(&fbdo_ALL, A+"/UID/"+uid)){
     Firebase.RTDB.setString(&fbdo_ALL, A + "/TEMP_UID", "1");
@@ -246,6 +245,7 @@ void dump_byte_array(byte *readCard, byte readCardSize) {
       digitalWrite(open_gate, HIGH);
       digitalWrite(close_gate, LOW);
       open_time_saving();
+      Firebase.RTDB.setString(&fbdo_ALL, STAT1, OnNum);
     }
     else if (fbdo_ALL.stringData() == "0"){
       Serial.println(" ");
@@ -255,6 +255,8 @@ void dump_byte_array(byte *readCard, byte readCardSize) {
       digitalWrite(open_gate, LOW);
       digitalWrite(close_gate, HIGH);
       open_time_saving();
+      Firebase.RTDB.setString(&fbdo_ALL, STAT1, CloseNum);
+      
     }
   }
   Serial.println("DONE");
@@ -273,7 +275,7 @@ void door_open(){
     } 
     else if (key == '#') {
       lcd.clear();
-      if (input_password == password_1 || input_password == password_temp) {
+      if (a+input_password+a == password_1 || input_password == password_temp) {
         Serial.println(" ");
         Serial.println("Valid Password => unlock the door");
         LED_OPEN = "OPEN";
@@ -281,6 +283,7 @@ void door_open(){
         digitalWrite(open_gate, HIGH);
         digitalWrite(close_gate, LOW);
         open_time_saving();
+        Firebase.RTDB.setString(&fbdo_ALL, STAT1, OnNum);
 
         lcd.setCursor(0, 0);
         lcd.print("CORRECT!");
@@ -295,6 +298,7 @@ void door_open(){
         digitalWrite(open_gate, LOW);
         digitalWrite(close_gate, HIGH);
         open_time_saving();
+        Firebase.RTDB.setString(&fbdo_ALL, STAT1, CloseNum);
         
         lcd.setCursor(0, 0);
         lcd.print("INCORRECT!");
@@ -327,6 +331,8 @@ void ReadStat(){
       Serial.println(fbdo_ALL.errorReason());
     }
     if (fbdo_ALL.streamAvailable()) {
+      Serial.println("Path : " + fbdo_ALL.streamPath() + fbdo_ALL.dataPath());
+      Serial.println("Data : " + fbdo_ALL.stringData());
       if (fbdo_ALL.dataPath() == "/D1"){
         if (fbdo_ALL.stringData() == CloseNum) {
           digitalWrite(open_gate, LOW);
@@ -335,6 +341,7 @@ void ReadStat(){
           LED_OPEN = "CLOSE";
           gate_stat="close";
           Serial.println("Door Locked");
+          open_time_saving();
         } else if (fbdo_ALL.stringData() == OnNum) {
           digitalWrite(open_gate, HIGH);
           digitalWrite(close_gate, LOW);
@@ -342,23 +349,26 @@ void ReadStat(){
           LED_OPEN = "OPEN";
           gate_stat="open";
           Serial.println("Door Opened");
+          open_time_saving();
         }
       }
       if (fbdo_ALL.stringData().substring(2, 4) == "D1"){
-        if(fbdo_ALL.stringData().substring(7, 8).toInt() == CloseNum){
+        if(fbdo_ALL.stringData().substring(7, 8) == CloseNum){
           digitalWrite(open_gate, LOW);
           digitalWrite(close_gate, HIGH);
           open_time_saving();
           LED_OPEN = "CLOSE";
           gate_stat="close";
           Serial.println("Door Locked");
-        }else if(fbdo_ALL.stringData().substring(7, 8).toInt() == OnNum){
+          open_time_saving();
+        }else if(fbdo_ALL.stringData().substring(7, 8) == OnNum){
           digitalWrite(open_gate, HIGH);
           digitalWrite(close_gate, LOW);
           open_time_saving();
           LED_OPEN = "OPEN";
           gate_stat="open";
           Serial.println("Door Opened");
+          open_time_saving();
         }
       }
       if (fbdo_ALL.dataPath() == "/esp"){
@@ -380,7 +390,6 @@ void ReadStat(){
         if(fbdo_Password.dataType() == "string"){
           if (fbdo_Password.stringData() != "0"){
             password_1 = fbdo_Password.stringData();
-            password_1.replace(a,"");
             Serial.println("password_1 now is " + password_1);
           }
           else{
@@ -390,12 +399,14 @@ void ReadStat(){
         } 
       }
       if (fbdo_Password.stringData().substring(2, 5) == "PW1"){
-        String PW = fbdo_Password.stringData().substring(10, 22)
+        String PW = fbdo_Password.stringData().substring(10, 22);
         PW.replace("\"","");
         PW.replace("\\","");
         PW.replace("}","");
+        PW.replace(",","");
+        PW.replace("P","");
         if(PW != "0"){
-          password_1 = PW;
+          password_1 = a+PW+a;
           Serial.println("password_1 now is " + password_1);
         }else{
           password_1 = "";
@@ -417,10 +428,11 @@ void ReadStat(){
         } 
       }
       if (fbdo_Password.stringData().substring(2, 8) == "PWTemp"){
-        String TPW = fbdo_Password.stringData().substring(13, 25)
+        String TPW = fbdo_Password.stringData().substring(13, 25);
         TPW.replace("\"","");
         TPW.replace("\\","");
         TPW.replace("}","");
+        TPW.replace(",","");
         if (TPW != "0"){
           password_temp = TPW;
           temp_time_saving();

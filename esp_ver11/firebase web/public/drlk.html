@@ -203,12 +203,13 @@
                 addCard.innerHTML = '新增一張卡片'
                 NewCard.close()
                 var uid = NewCardUid.innerHTML
+                var set = uid + ": '1'"
 
                 update(ref(db, MAC),{
                     TEMP_UID: "0"
                 })
                 update(ref(db, MAC + "/UID"),{
-                    uid: "1"
+                    set
                 })
             }
             function NewCardERROR(){

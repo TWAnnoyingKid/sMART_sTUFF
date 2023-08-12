@@ -88,7 +88,7 @@
 
             const MOI = ref(db, MAC + "/Moisture")
             const WTIMESet = ref(db, MAC + "/TIME")
-
+            const wt = ref(db, MAC + "/WATER")
 
             onValue(MOI, (snapshot) => {
                 if(snapshot.val() != "0" && snapshot.val() != null){
@@ -97,6 +97,13 @@
                 }else{
                     humidTAG.innerHTML = ''
                     humid.innerHTML = ''
+                }
+            })
+            onValue(wt, (snapshot) => {
+                if(snapshot.val() == "0"){
+                    water.innerHTML = '澆水'
+                }else{
+                    water.innerHTML = '澆水中...'
                 }
             })
             onValue(WTIMESet, (snapshot) => {
@@ -146,10 +153,25 @@
                     WTSet.close()
                 }
             }
+            function watering(){
+                if(water.innerHTML == "澆水"){
+                    update(ref(db, MAC),{
+                        WATER: "1"
+                    })
+                    water.innerHTML="澆水中..."
+                }else if(water.innerHTML == "澆水中..."){
+                    update(ref(db, MAC),{
+                        WATER: "0"
+                    })
+                    water.innerHTML="澆水"
+                }
+                
+            }
 
             waterTime.addEventListener('click',WTBTNSET)
             WTSetconfirm.addEventListener('click',SetWT)
             WTconfirm.addEventListener('click',ResetWT)
+            water.addEventListener('click',watering)
 
 
           </script>

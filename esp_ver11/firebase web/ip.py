@@ -1,2 +1,5 @@
-import os
-print (os.system("nslookup"))
+import socket   
+hostname=socket.gethostname()   
+IPAddr=socket.gethostbyname(hostname)   
+print(hostname)   
+print(IPAddr)   

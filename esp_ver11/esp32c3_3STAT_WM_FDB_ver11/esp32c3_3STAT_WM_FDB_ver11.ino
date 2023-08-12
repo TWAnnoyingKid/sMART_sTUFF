@@ -95,10 +95,9 @@ void setup() {
                     0);  
   
   WiFiManager wifiManager;
-  // wifiManager.resetSettings();
-  if (digitalRead(rs) == LOW) {
-    wifiManager.resetSettings();
-  }
+  // if (digitalRead(rs) == LOW) {
+  //   wifiManager.resetSettings();
+  // }
   digitalWrite(LED_PIN, LOW);
   wifiManager.autoConnect("sMART sTUFF");
 
@@ -181,15 +180,16 @@ void ReadStat() {
       Serial.println(fbdo_ALL.errorReason());
     }
     if (fbdo_ALL.streamAvailable()) {
-      Serial.println("Path : " + fbdo_ALL.streamPath() + fbdo_ALL.dataPath());
-      Serial.println("Data : " + fbdo_ALL.stringData());
+      // Serial.println("Path : " + fbdo_ALL.streamPath() + fbdo_ALL.dataPath());
+      // Serial.println("Data : " + fbdo_ALL.stringData());
       if (fbdo_ALL.dataPath() == "/esp"){
         if (fbdo_ALL.stringData() == "1") {
           Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "2");
         } 
       }
       if (fbdo_ALL.stringData().substring(2, 5) == "esp"){
-        Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "2");
+        Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "0");
+        Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "1");
       }
       ///////////////////////////////////////////////////////////
       if (fbdo_ALL.dataPath() == "/D1"){
@@ -221,10 +221,10 @@ void ReadStat() {
       }
       if (fbdo_ALL.dataPath() == "/"){
         if (fbdo_ALL.stringData().substring(2, 4) == "D1"){
-          if(fbdo_ALL.stringData().substring(7, 8).toInt() == CloseNum){
+          if(fbdo_ALL.stringData().substring(7, 8) == CloseNum){
             digitalWrite(output1, HIGH);
             Serial.println("D1 OFF");
-          }else if(fbdo_ALL.stringData().substring(7, 8).toInt() == OnNum){
+          }else if(fbdo_ALL.stringData().substring(7, 8) == OnNum){
             digitalWrite(output1, LOW);
             Serial.println("D1 ON");
           }
@@ -252,44 +252,44 @@ void ReadStat() {
       if (fbdo_ALL.dataPath() == "/OT/D1"){
         if(fbdo_ALL.dataType() == "string"){
           D1_TO = fbdo_ALL.stringData();
-          D1_TO.replace(a,"");
           Serial.println("D1_TO now is " + D1_TO);
         } 
       }
       if (fbdo_ALL.dataPath() == "/OT/D2"){
         if(fbdo_ALL.dataType() == "string"){
           D2_TO = fbdo_ALL.stringData();
-          D2_TO.replace(a,"");
           Serial.println("D2_TO now is " + D2_TO);
         } 
       }
       if (fbdo_ALL.dataPath() == "/OT/D3"){
         if(fbdo_ALL.dataType() == "string"){
           D3_TO = fbdo_ALL.stringData();
-          D3_TO.replace(a,"");
           Serial.println("D3_TO now is " + D3_TO);
         } 
       }
       if (fbdo_ALL.dataPath() == "/OT"){
         if (fbdo_ALL.stringData().substring(2, 4) == "D1"){
-          D1_TO = fbdo_ALL.stringData().substring(9,14);
-          D1_TO.replace("\"", "");
-          D1_TO.replace("\\", "");
-          D1_TO.replace("}", "");
+          String t = fbdo_ALL.stringData().substring(9,14);
+          t.replace("\"", "");
+          t.replace("\\", "");
+          t.replace("}", "");
+          D1_TO = a+t+a;
           Serial.println("D1_TO now is " + D1_TO);
         } 
         if (fbdo_ALL.stringData().substring(2, 4) == "D2"){
-          D2_TO = fbdo_ALL.stringData().substring(9,14);
-          D2_TO.replace("\"", "");
-          D2_TO.replace("\\", "");
-          D2_TO.replace("}", "");
+          String t = fbdo_ALL.stringData().substring(9,14);
+          t.replace("\"", "");
+          t.replace("\\", "");
+          t.replace("}", "");
+          D2_TO = a+t+a;
           Serial.println("D2_TO now is " + D2_TO);
         }
         if (fbdo_ALL.stringData().substring(2, 4) == "D3"){
-          D3_TO = fbdo_ALL.stringData().substring(9,14);
-          D3_TO.replace("\"", "");
-          D3_TO.replace("\\", "");
-          D3_TO.replace("}", "");
+          String t = fbdo_ALL.stringData().substring(9,14);
+          t.replace("\"", "");
+          t.replace("\\", "");
+          t.replace("}", "");
+          D3_TO = a+t+a;
           Serial.println("D3_TO now is " + D3_TO);
         }
       }
@@ -317,24 +317,27 @@ void ReadStat() {
       }
       if (fbdo_ALL.dataPath() == "/CT"){
         if (fbdo_ALL.stringData().substring(2, 4) == "D1"){
-          D1_TC = fbdo_ALL.stringData().substring(9,14);
-          D1_TC.replace("\"", "");
-          D1_TC.replace("\\", "");
-          D1_TC.replace("}", "");
+          String t = fbdo_ALL.stringData().substring(9,14);
+          t.replace("\"", "");
+          t.replace("\\", "");
+          t.replace("}", "");
+          D1_TC = a+t+a;
           Serial.println("D1_TC now is " + D1_TC);
         } 
         if (fbdo_ALL.stringData().substring(2, 4) == "D2"){
-          D2_TC = fbdo_ALL.stringData().substring(9,14);
-          D2_TC.replace("\"", "");
-          D2_TC.replace("\\", "");
-          D2_TC.replace("}", "");
+          String t = fbdo_ALL.stringData().substring(9,14);
+          t.replace("\"", "");
+          t.replace("\\", "");
+          t.replace("}", "");
+          D2_TC = a+t+a;
           Serial.println("D2_TC now is " + D2_TC);
         }
         if (fbdo_ALL.stringData().substring(2, 4) == "D3"){
-          D3_TC = fbdo_ALL.stringData().substring(9,14);
-          D3_TC.replace("\"", "");
-          D3_TC.replace("\\", "");
-          D3_TC.replace("}", "");
+          String t = fbdo_ALL.stringData().substring(9,14);
+          t.replace("\"", "");
+          t.replace("\\", "");
+          t.replace("}", "");
+          D3_TC = a+t+a;
           Serial.println("D3_TC now is " + D3_TC);
         }
       }
@@ -438,7 +441,7 @@ void Task1code( void * pvParameters ){
 }
 void time(){
   timeClient.update();
-  String nowTime = timeClient.getHours() + ":" + timeClient.getMinutes();
+  String nowTime = a+timeClient.getHours() + ":" + timeClient.getMinutes()+a;
   // Serial.println(nowTime);
   if (timeClient.getSeconds() > 0 & timeClient.getSeconds() < 3) {
     if(D1_TO == nowTime){
