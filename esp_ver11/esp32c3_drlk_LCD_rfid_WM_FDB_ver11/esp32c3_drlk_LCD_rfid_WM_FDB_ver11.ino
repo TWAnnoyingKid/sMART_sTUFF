@@ -59,7 +59,7 @@ MFRC522 rfid(SS_PIN, RST_PIN);
 LiquidCrystal_I2C lcd(0x27,16,2);  // SDA to GPIO21 || SCL to GPIO22
 
 String password_1 = ""; 
-String password_temp = ""; 
+String password_temp = "non"; 
 String temp_time = "";
 String input_password;
 String open_time = "";
@@ -189,13 +189,18 @@ void sro4(){
       digitalWrite(open_gate, LOW);
       digitalWrite(close_gate, HIGH);
       // gate_stat="open";
-      open_time_saving();
+      delay(1500);
+      digitalWrite(open_gate, LOW);
+      digitalWrite(close_gate, LOW);
     }
     else if(gate_stat == "open" ){
       digitalWrite(open_gate, LOW);
       digitalWrite(close_gate, HIGH);
       gate_stat="close";
-      open_time_saving();
+      delay(1500);
+      digitalWrite(open_gate, LOW);
+      digitalWrite(close_gate, LOW);
+      // Firebase.RTDB.setString(&fbdo_ALL, STAT1, CloseNum);
     }
   }
   delay(100);
@@ -231,8 +236,10 @@ void dump_byte_array(byte *readCard, byte readCardSize) {
     gate_stat="close";
     digitalWrite(open_gate, LOW);
     digitalWrite(close_gate, HIGH);
-    open_time_saving();
-    Firebase.RTDB.setString(&fbdo_ALL, STAT1, CloseNum);
+    delay(1500);
+    digitalWrite(open_gate, LOW);
+    digitalWrite(close_gate, LOW);
+    // Firebase.RTDB.setString(&fbdo_ALL, STAT1, CloseNum);
     
   }
   else if (Firebase.RTDB.getString(&fbdo_ALL, A+"/UID/"+uid)){
@@ -244,8 +251,10 @@ void dump_byte_array(byte *readCard, byte readCardSize) {
       gate_stat="open";
       digitalWrite(open_gate, HIGH);
       digitalWrite(close_gate, LOW);
-      open_time_saving();
-      Firebase.RTDB.setString(&fbdo_ALL, STAT1, OnNum);
+      delay(1300);
+      digitalWrite(open_gate, LOW);
+      digitalWrite(close_gate, LOW);
+      // Firebase.RTDB.setString(&fbdo_ALL, STAT1, OnNum);
     }
     else if (fbdo_ALL.stringData() == "0"){
       Serial.println(" ");
@@ -254,9 +263,10 @@ void dump_byte_array(byte *readCard, byte readCardSize) {
       gate_stat="close";
       digitalWrite(open_gate, LOW);
       digitalWrite(close_gate, HIGH);
-      open_time_saving();
-      Firebase.RTDB.setString(&fbdo_ALL, STAT1, CloseNum);
-      
+      delay(1500);
+      digitalWrite(open_gate, LOW);
+      digitalWrite(close_gate, LOW);
+      // Firebase.RTDB.setString(&fbdo_ALL, STAT1, CloseNum);
     }
   }
   Serial.println("DONE");
@@ -282,8 +292,10 @@ void door_open(){
         gate_stat="open";
         digitalWrite(open_gate, HIGH);
         digitalWrite(close_gate, LOW);
-        open_time_saving();
-        Firebase.RTDB.setString(&fbdo_ALL, STAT1, OnNum);
+        delay(1300);
+        digitalWrite(open_gate, LOW);
+        digitalWrite(close_gate, LOW);
+        // Firebase.RTDB.setString(&fbdo_ALL, STAT1, OnNum);
 
         lcd.setCursor(0, 0);
         lcd.print("CORRECT!");
@@ -297,8 +309,10 @@ void door_open(){
         gate_stat="close";
         digitalWrite(open_gate, LOW);
         digitalWrite(close_gate, HIGH);
-        open_time_saving();
-        Firebase.RTDB.setString(&fbdo_ALL, STAT1, CloseNum);
+        delay(1300);
+        digitalWrite(open_gate, LOW);
+        digitalWrite(close_gate, LOW);
+        // Firebase.RTDB.setString(&fbdo_ALL, STAT1, CloseNum);
         
         lcd.setCursor(0, 0);
         lcd.print("INCORRECT!");
@@ -331,46 +345,63 @@ void ReadStat(){
       Serial.println(fbdo_ALL.errorReason());
     }
     if (fbdo_ALL.streamAvailable()) {
-      Serial.println("Path : " + fbdo_ALL.streamPath() + fbdo_ALL.dataPath());
-      Serial.println("Data : " + fbdo_ALL.stringData());
+      // Serial.println("Path : " + fbdo_ALL.streamPath() + fbdo_ALL.dataPath());
+      // Serial.println("Data : " + fbdo_ALL.stringData());
       if (fbdo_ALL.dataPath() == "/D1"){
         if (fbdo_ALL.stringData() == CloseNum) {
           digitalWrite(open_gate, LOW);
           digitalWrite(close_gate, HIGH);
-          open_time_saving();
           LED_OPEN = "CLOSE";
           gate_stat="close";
           Serial.println("Door Locked");
-          open_time_saving();
+          delay(1500);
+          digitalWrite(open_gate, LOW);
+          digitalWrite(close_gate, LOW);
         } else if (fbdo_ALL.stringData() == OnNum) {
           digitalWrite(open_gate, HIGH);
           digitalWrite(close_gate, LOW);
-          open_time_saving();
-          LED_OPEN = "OPEN";
-          gate_stat="open";
-          Serial.println("Door Opened");
-          open_time_saving();
-        }
-      }
-      if (fbdo_ALL.stringData().substring(2, 4) == "D1"){
-        if(fbdo_ALL.stringData().substring(7, 8) == CloseNum){
+          delay(1300);
           digitalWrite(open_gate, LOW);
-          digitalWrite(close_gate, HIGH);
-          open_time_saving();
-          LED_OPEN = "CLOSE";
-          gate_stat="close";
-          Serial.println("Door Locked");
-          open_time_saving();
-        }else if(fbdo_ALL.stringData().substring(7, 8) == OnNum){
-          digitalWrite(open_gate, HIGH);
           digitalWrite(close_gate, LOW);
-          open_time_saving();
           LED_OPEN = "OPEN";
           gate_stat="open";
           Serial.println("Door Opened");
-          open_time_saving();
         }
       }
+      if(fbdo_ALL.stringData().length()<15){
+        if (fbdo_ALL.stringData().substring(2, 4) == "D1"){
+          if(fbdo_ALL.stringData().substring(7, 8) == CloseNum){
+            digitalWrite(open_gate, LOW);
+            digitalWrite(close_gate, HIGH);
+            LED_OPEN = "CLOSE";
+            gate_stat="close";
+            Serial.println("Door Locked");
+            delay(1500);
+            digitalWrite(open_gate, LOW);
+            digitalWrite(close_gate, LOW);
+          }else if(fbdo_ALL.stringData().substring(7, 8) == OnNum){
+            digitalWrite(open_gate, HIGH);
+            digitalWrite(close_gate, LOW);
+            delay(1300);
+            digitalWrite(open_gate, LOW);
+            digitalWrite(close_gate, LOW);
+            LED_OPEN = "OPEN";
+            gate_stat="open";
+            Serial.println("Door Opened");
+          }
+        }
+        
+      }
+      if (fbdo_ALL.dataPath() == "/UID"){
+        if (fbdo_ALL.stringData().substring(2, 5) == "set"){
+          String TU = fbdo_ALL.stringData().substring(8, 20);
+          TU.replace("\"","");
+          TU.replace("\\","");
+          TU.replace("}","");
+          Firebase.RTDB.setString(&fbdo_ALL, A + "/UID/" + TU, "1");
+        }
+      }
+
       if (fbdo_ALL.dataPath() == "/esp"){
         if (fbdo_ALL.stringData() == "1") {
           Firebase.RTDB.setString(&fbdo_ALL, CNSTAT, "2");
@@ -398,22 +429,24 @@ void ReadStat(){
           }
         } 
       }
-      if (fbdo_Password.stringData().substring(2, 5) == "PW1"){
-        String PW = fbdo_Password.stringData().substring(10, 22);
-        PW.replace("\"","");
-        PW.replace("\\","");
-        PW.replace("}","");
-        PW.replace(",","");
-        PW.replace("P","");
-        if(PW != "0"){
-          password_1 = a+PW+a;
-          Serial.println("password_1 now is " + password_1);
-        }else{
-          password_1 = "";
-          Serial.println("Password fail");
+      if(fbdo_Password.stringData().length()<32){
+        if (fbdo_Password.stringData().substring(2, 5) == "PW1"){
+          String PW = fbdo_Password.stringData().substring(10, 22);
+          PW.replace("\"","");
+          PW.replace("\\","");
+          PW.replace("}","");
+          PW.replace(",","");
+          PW.replace("P","");
+          if(PW != "0"){
+            password_1 = a+PW+a;
+            Serial.println("password_1 now is " + password_1);
+          }else{
+            password_1 = "";
+            Serial.println("Password fail");
+          }
         }
-        
       }
+      
       if (fbdo_Password.dataPath() == "/PWTemp"){
         if(fbdo_Password.dataType() == "string"){
           if (fbdo_Password.stringData() != "0"){
@@ -427,19 +460,21 @@ void ReadStat(){
           }
         } 
       }
-      if (fbdo_Password.stringData().substring(2, 8) == "PWTemp"){
-        String TPW = fbdo_Password.stringData().substring(13, 25);
-        TPW.replace("\"","");
-        TPW.replace("\\","");
-        TPW.replace("}","");
-        TPW.replace(",","");
-        if (TPW != "0"){
-          password_temp = TPW;
-          temp_time_saving();
-          Serial.println("password_temp now is " + password_temp);
-        }else{
-          temp_time = "";
-          Serial.println("Temp Password fail");
+      if(fbdo_Password.stringData().length()<35){
+        if (fbdo_Password.stringData().substring(2, 8) == "PWTemp"){
+          String TPW = fbdo_Password.stringData().substring(13, 25);
+          TPW.replace("\"","");
+          TPW.replace("\\","");
+          TPW.replace("}","");
+          TPW.replace(",","");
+          if (TPW != "0"){
+            password_temp = TPW;
+            temp_time_saving();
+            Serial.println("password_temp now is " + password_temp);
+          }else{
+            temp_time = "";
+            Serial.println("Temp Password fail");
+          }
         }
       }
     }
@@ -450,41 +485,10 @@ void temp_time_saving(){
   temp_time = timeClient.getMinutes();
   Serial.println("Temp Password Saving Time：" + temp_time);
 }
-void open_time_saving(){
-  timeClient.update();
-  open_time = timeClient.getSeconds();
-  Serial.println("Gate Open Saving Time：" + open_time);
-}
 
 void time(){
   timeClient.update();
-  if(open_time != ""){
-    int opt = timeClient.getSeconds() - open_time.toInt();
-    if(opt > 0){
-      if(opt == 5){
-        if(digitalRead(open_gate) == HIGH){
-          digitalWrite(open_gate, LOW);
-        }
-        if(digitalRead(close_gate) == HIGH){
-          digitalWrite(close_gate, LOW);
-        }
-        Serial.println("Gate Open Saving Time FAILD");
-        open_time = "";
-      }
-    }
-    else if(opt < 0){
-      if(opt == -55){
-        if(digitalRead(open_gate) == HIGH){
-          digitalWrite(open_gate, LOW);
-        }
-        if(digitalRead(close_gate) == HIGH){
-          digitalWrite(close_gate, LOW);
-        }
-        Serial.println("Gate Open Saving Time FAILD");
-        open_time = "";
-      }
-    }
-  }
+  
   if (timeClient.getSeconds() > 0 & timeClient.getSeconds() < 3) {
     if(temp_time != ""){
       int g = timeClient.getMinutes() - temp_time.toInt();
@@ -493,7 +497,7 @@ void time(){
           Serial.println("Temp Password fail");
           Firebase.RTDB.setString(&fbdo_ALL, A + "/Password/PWTemp", "0");
           temp_time = "";
-          password_temp = "";
+          password_temp = "non";
         }
       }
       else if(g < 0){ 
@@ -501,7 +505,7 @@ void time(){
           Serial.println("Temp Password fail");
           Firebase.RTDB.setString(&fbdo_ALL, A + "/Password/PWTemp", "0");
           temp_time = "";
-          password_temp = "";
+          password_temp = "non";
         }
       }
     }
@@ -514,13 +518,13 @@ void Task1code( void * pvParameters ){
     door_open();
     while (LED_SETTING == "ON"){
       digitalWrite(LED_PIN, HIGH);
-      delay(1000);
+      delay(1300);
       digitalWrite(LED_PIN, LOW);
-      delay(1000);
+      delay(1300);
     }
     if (LED_OPEN == "CLOSE"){
       digitalWrite(LED_PIN, HIGH);
-      delay(2000);
+      delay(1300);
       digitalWrite(LED_PIN, LOW);
       LED_OPEN = "NON";
     }
