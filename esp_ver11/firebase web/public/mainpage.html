@@ -8,34 +8,34 @@
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
     </head>
     <body Align="Center">
-        <div class="SS">
-            <div style="width:130px">
-                <img src="picture\sloth.png" width="120px" height="120px">  
-            </div>
-            <h1> sMART <br> sTUFF</h1>
-        </div>
-        <br>
-        <br>
-        <br>
-        <div style="width: 80%; margin:0px auto;" Align="Center">
-            <h2 id="welcome" style="display: inline;"></h2>
-            <h2 id="username" style="display: inline;"></h2><br>
-            <div style="width: 185px; margin:0px auto;">
-                <button type="button" id="login" class="Time" onclick="location.href='login.html'">登入</button>
-                <h4 id="noaccount" style="display:inline">沒有帳號嗎?
-                    <a href="signup.html" id="signup">註冊</a>
-                </h4>
-                <br>
-                <br>
-                <button type="button" id="device" class="Time" onclick="location.href='devicepage.html'">查看擁有的裝置</button><br>
-                <button type="button" id="logout" class="Time">登出</button><br>
+        <section class="mainlayout">
+            <div class="mainheader">
+                <div class="SS" onclick="location.href='mainpage.html'">
+                    <div style="width:35%">
+                        <img src="picture\sloth.png" width="90%" height="90%">  
+                    </div>
+                    <h1> sMART <br> sTUFF</h1>
+                </div>
                 
             </div>
-        </div>
-        
-        
-
-        <div id="deviceplce"></div>
+            <div class="maincenter">
+                <div style="width: 80%; margin:0px auto;" Align="Center">
+                    <br><br>
+                    <h2 id="welcome" style="display: inline;"></h2>
+                    <h2 id="username" style="display: inline;"></h2><br><br>
+                    <div style="width: 185px; margin:0px auto;">
+                        <button type="button" id="login" class="Time" onclick="location.href='login.html'">登入</button>
+                        <h4 id="noaccount" style="display:inline">沒有帳號嗎?
+                            <a href="signup.html" id="signup">註冊</a>
+                        </h4>
+                        <button type="button" id="device" class="Time" onclick="location.href='devicepage.html'">查看擁有的裝置</button><br>
+                        <button type="button" id="logout" class="Time">登出</button><br>
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="mainfooter"></div>
+        </section>
         
         <script>
             const user = Cookies.get('user');

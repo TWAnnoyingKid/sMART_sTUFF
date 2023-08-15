@@ -3,46 +3,45 @@
     <head >
         <title id="Title">STRIP</title>
         <meta charset="UTF-8">
-        <!-- <meta http-equiv="Permissions-Policy" content="interest-cohort=()"> -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="style.css">
         <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
     </head>
     <body>
-        <!-- <div class="SS" onclick="location.href='mainpage.html'">
-            <div style="width:130px">
-                <img src="picture\sloth.png" width="120px" height="120px">  
+        <section class="layout">
+            <div class="header">
+                <h1 id="NameOfDevice" class="NameOfDevice"></h1>
             </div>
-            <h1> sMART <br> sTUFF</h1>
-        </div> -->
-        <h1 id="NameOfDevice" class="NameOfDevice"></h1>
-        <div style="width: 80px; margin:0px auto;" Align="Center">
-            <h2 id="modeStat" style="display: inline; "></h2><br><br>
-        </div>
-        <div style="width: 130px; margin:0px auto;">
-            <select id="modeSet" style="width:130px; height:30px; font-size: 15px;">
-                <option> 模式選單 </option>
-                <option value=1> 恆亮 </option>
-                <option value=2> 呼吸 </option>
-                <option value=3> 跑馬燈 </option>
-                <option value=4> 彩虹 </option>
-                <option value=6> 關閉 </option>
-            </select>
-            <!-- <button id="test">test</button> -->
-        </div>
-        <br>
-        
-        <div style="width: 350px; margin:0px auto;">
-            <p id="rgb"></p>
-            <div class="colorSet" id="sliderPicker"></div>
-        </div>
-
-        <br><br><br>
-        <div class="goBackDevicePage">
-            <a href="devicepage.html">
-                <button type="button" id="back" class="back">回到裝置頁</button><br>
-            </a>
-        </div>
+            <div class="main">
+                <div style="width: 80%; margin:0px auto;" Align="Center">
+                    <h2 id="modeStat" style="display: inline; "></h2><br><br>
+                </div>
+                <div style="width: 80%; margin:0px auto;" Align="Center">
+                    <select id="modeSet" style="width:130px; height:30px; font-size: 15px;">
+                        <option> 模式選單 </option>
+                        <option value=1> 恆亮 </option>
+                        <option value=2> 呼吸 </option>
+                        <option value=3> 跑馬燈 </option>
+                        <option value=4> 彩虹 </option>
+                        <option value=6> 關閉 </option>
+                    </select>
+                    <!-- <button id="test">test</button> -->
+                </div>
+                <br>
+                <div style="width: 100%; margin:0px auto;" Align="Center">
+                    <p id="rgb"></p>
+                    <div class="colorSet" id="sliderPicker"></div>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="goBackDevicePage">
+                    <a href="devicepage.html">
+                        <button type="button" id="back" class="back">回到裝置頁</button><br>
+                    </a>
+                </div>
+            </div>
+        </section>
 
         <script type="module">
             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
@@ -184,6 +183,6 @@
             modeSet.addEventListener('change', modeChange)
             // test.addEventListener('click', testBTN)
             window.onload(slideBarSet())
-          </script>
+        </script>
     </body>
 </html>

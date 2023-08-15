@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="head" Align="Center">
+<html class="head">
     <head>
         <title id="Title">3STAT</title>
         <meta charset="UTF-8">
@@ -8,78 +8,68 @@
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
     </head>
     <body>
-        <!-- <div class="SS" onclick="location.href='mainpage.html'">
-            <div style="width:130px">
-                <img src="picture\sloth.png" width="120px" height="120px">  
+        <section class="layout">
+            <div class="header">
+                <h1 id="NameOfDevice" class="NameOfDevice"></h1>
             </div>
-            <h1> sMART <br> sTUFF</h1>
-        </div> -->
-        <h1 id="NameOfDevice" class="NameOfDevice"></h1>
-        <div class="main">
-            <div class="center">
-                <h2 id="NameOfD1" class="name"></h2>
-                <button type="button" id="newD1" class="ChangeName">
-                    <img src="picture\edit.png" alt="Image" width="25px" height="25px" >
-                </button><br>
-            </div> 
-            <div class="stat">
-                <div style="width:100%">
-                    <button type="button" id="StatOfD1" class="SW">開啟</button>
+            <div class="main">
+                <div class="btn">
+                    <div class="center">
+                        <img src="picture\edit.png" alt="Image" width="25px" height="25px" id="newD1" class="ChangeName">
+                        <h2 id="NameOfD1" class="name"></h2>
+                    </div> 
+                    <div class="stat">
+                        <div style="width:50%;">
+                            <button type="button" id="StatOfD1" class="SW">開啟</button>
+                        </div>
+                        <div style="width:180%">
+                            <button type="button" id="TimeOnOfD1" class="Time">設定開啟時間</button>
+                            <button type="button" id="TimeOffOfD1" class="Time">設定關閉時間</button>
+                        </div>
+                    </div>
                 </div>
-                <div style="width:180%">
-                    <button type="button" id="TimeOnOfD1" class="Time">設定開啟時間</button><br>
-                    <button type="button" id="TimeOffOfD1" class="Time">設定關閉時間</button>
+                <br><br>
+                <div class="btn">
+                    <div class="center">
+                        <img src="picture\edit.png" alt="Image" width="25px" height="25px" id="newD2" class="ChangeName" >
+                        <h2 id="NameOfD2" class="name"></h2>
+                    </div>
+                    <div class="stat">
+                        <div style="width:50%">
+                            <button type="button" id="StatOfD2" class="SW">開啟</button>
+                        </div>
+                        <div style="width:180%">
+                            <button type="button" id="TimeOnOfD2" class="Time">設定開啟時間</button>
+                            <button type="button" id="TimeOffOfD2" class="Time">設定關閉時間</button>
+                        </div>
+                    </div>
                 </div>
+                <br><br>
+                <div class="btn">
+                    <div style="width:100%">
+                        <img src="picture\edit.png" alt="Image" width="25px" height="25px" id="newD3" class="ChangeName">
+                        <h2 id="NameOfD3" class="name"></h2>
+                    </div>
+                    <div class="stat">
+                        <div style="width:50%">
+                            <button type="button" id="StatOfD3" class="SW">開啟</button>
+                        </div>
+                        <div style="width:180%">
+                            <button type="button" id="TimeOnOfD3" class="Time">設定開啟時間</button>
+                            <button type="button" id="TimeOffOfD3" class="Time">設定關閉時間</button>
+                        </div>
+                    </div>
+                </div>
+                <br><br><br>
             </div>
-        </div>
-        
-        <br><br>
-
-        <div class="main">
-            <div class="center">
-                <h2 id="NameOfD2" class="name"></h2>
-                <button type="button" id="newD2" class="ChangeName">
-                    <img src="picture\edit.png" alt="Image" width="25px" height="25px" >
-                </button><br>
-            </div>
-            <div class="stat">
-                <div style="width:95px">
-                    <button type="button" id="StatOfD2" class="SW">開啟</button>
-                </div>
-                <div style="width:180px">
-                    <button type="button" id="TimeOnOfD2" class="Time">設定開啟時間</button><br>
-                    <button type="button" id="TimeOffOfD2" class="Time">設定關閉時間</button>
-                </div>
-            </div>
-        </div>
-        
-        <br><br>
-
-        <div class="main">
-            <div class="center">
-                <h2 id="NameOfD3" class="name"></h2>
-                <button type="button" id="newD3" class="ChangeName">
-                    <img src="picture\edit.png" alt="Image" width="25px" height="25px" >
-                </button><br>
-            </div>
-            <div class="stat">
-                <div style="width:95px">
-                    <button type="button" id="StatOfD3" class="SW">開啟</button>
-                </div>
-                <div style="width:180px">
-                    <button type="button" id="TimeOnOfD3" class="Time">設定開啟時間</button><br>
-                    <button type="button" id="TimeOffOfD3" class="Time">設定關閉時間</button>
+            <div class="footer">
+                <div class="goBackDevicePage">
+                    <a href="devicepage.html">
+                        <button type="button" id="back" class="back">回到裝置頁</button><br>
+                    </a>
                 </div>
             </div>
-        </div>
-        
-        <br><br><br>
-        <div class="goBackDevicePage">
-            <a href="devicepage.html">
-                <button type="button" id="back" class="back">回到裝置頁</button><br>
-            </a>
-        </div>
-        
+        </section>
 
         <dialog id="nameD1">
             <h1>請輸入新的裝置名稱</h1>
@@ -206,13 +196,13 @@
             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
 
             const firebaseConfig = {
-              apiKey: "AIzaSyAF4OdtYUAomk_4WnvE5MXb_nphlQ33UyA",
-              authDomain: "esp8266-ai2.firebaseapp.com",
-              databaseURL: "https://esp8266-ai2-default-rtdb.firebaseio.com",
-              projectId: "esp8266-ai2",
-              storageBucket: "esp8266-ai2.appspot.com",
-              messagingSenderId: "245671703015",
-              appId: "1:245671703015:web:28612316e5ec39dd6bcd42"
+            apiKey: "AIzaSyAF4OdtYUAomk_4WnvE5MXb_nphlQ33UyA",
+                authDomain: "esp8266-ai2.firebaseapp.com",
+                databaseURL: "https://esp8266-ai2-default-rtdb.firebaseio.com",
+                projectId: "esp8266-ai2",
+                storageBucket: "esp8266-ai2.appspot.com",
+                messagingSenderId: "245671703015",
+                appId: "1:245671703015:web:28612316e5ec39dd6bcd42"
             };
 
             const app = initializeApp(firebaseConfig);
@@ -706,6 +696,5 @@
             TCD3Setconfirm.addEventListener('click', SetD3CT)
 
         </script>
-
     </body>
 </html>

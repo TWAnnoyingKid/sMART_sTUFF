@@ -3,19 +3,34 @@
     <head>
         <title id="Title">DRLK</title>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="style.css">
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
     </head>
-    <body>
-        <h1 id="NameOfDevice"  class="NameOfDevice"></h1>
-        <br>
-        <div style="width: 180px;margin:0px auto;">
-            <button id="openGate" class="Time">開門</button><br><br>
-            <button id="changePassword" class="Time">設定密碼</button><br><br>
-            <button id="tempPassword" class="Time">建立暫時密碼</button><br>
-            <p id="tempPW"  Align="Center" style="width: 180px;margin:0px auto;"> </p><br>
-            <button id="addCard" class="Time">新增一張卡片</button><br><br>
-        </div>
+    <body Align="Center">
+        <section class="layout">
+            <div class="header">
+                <h1 id="NameOfDevice" class="NameOfDevice"></h1>
+            </div>
+            <div class="main">
+                <br><br>
+                <div style="width: 60%;margin:0px auto;">
+                    <button id="openGate" class="Time">開門</button><br><br>
+                    <button id="changePassword" class="Time">設定密碼</button><br><br>
+                    <button id="tempPassword" class="Time">建立暫時密碼</button><br>
+                    <p id="tempPW"  Align="Center" style="width: 180px;margin:0px auto;"> </p><br>
+                    <button id="addCard" class="Time">新增一張卡片</button><br><br>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="goBackDevicePage">
+                    <a href="devicepage.html">
+                        <button type="button" id="back" class="back">回到裝置頁</button><br>
+                    </a>
+                </div>
+            </div>
+        </section>
+        
         <br><br>
         <dialog id="PWCheck">
             <h1>是否更改密碼?</h1>
@@ -49,25 +64,18 @@
             <h1>卡片已經存在</h1>
             <button id="CardExistErr">確認</button>
         </dialog>
-        
-
-        <div class="goBackDevicePage">
-            <a href="devicepage.html">
-                <button type="button" id="back" class="back">回到裝置頁</button><br>
-            </a>
-        </div>
 
         <script type="module">
             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
 
             const firebaseConfig = {
-              apiKey: "AIzaSyAF4OdtYUAomk_4WnvE5MXb_nphlQ33UyA",
-              authDomain: "esp8266-ai2.firebaseapp.com",
-              databaseURL: "https://esp8266-ai2-default-rtdb.firebaseio.com",
-              projectId: "esp8266-ai2",
-              storageBucket: "esp8266-ai2.appspot.com",
-              messagingSenderId: "245671703015",
-              appId: "1:245671703015:web:28612316e5ec39dd6bcd42"
+                apiKey: "AIzaSyAF4OdtYUAomk_4WnvE5MXb_nphlQ33UyA",
+                authDomain: "esp8266-ai2.firebaseapp.com",
+                databaseURL: "https://esp8266-ai2-default-rtdb.firebaseio.com",
+                projectId: "esp8266-ai2",
+                storageBucket: "esp8266-ai2.appspot.com",
+                messagingSenderId: "245671703015",
+                appId: "1:245671703015:web:28612316e5ec39dd6bcd42"
             };
 
             const app = initializeApp(firebaseConfig);

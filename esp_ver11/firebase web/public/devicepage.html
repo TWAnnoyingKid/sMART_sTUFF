@@ -1,27 +1,33 @@
 <!DOCTYPE html>
 <html class="head">
     <head>
-        <title>DevicePage</title>
+        <title id="Title">DevicePage</title>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="style.css">
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
     </head>
     <body Align="Center">
-        <div class="SS" onclick="location.href='mainpage.html'">
-            <div style="width:130px">
-                <img src="picture\sloth.png" width="120px" height="120px">  
+        <section class="mainlayout">
+            <div class="mainheader">
+                <div class="SS" onclick="location.href='mainpage.html'">
+                    <div style="width:35%">
+                        <img src="picture\sloth.png" width="90%" height="90%">  
+                    </div>
+                    <h1> sMART <br> sTUFF</h1>
+                </div>
             </div>
-            <h1> sMART <br> sTUFF</h1>
-        </div>
-        <br><br><br>
-        <div class="deviceBtn">
-            <div id="deviceplace"></div>
-        </div>
-        <br><br><br>
-        <div style="width: 125px; margin:0px auto;">
-            <button type="button" id="back" class="back" onclick="location.href='mainpage.html'">回到主頁面</button>
-        </div>
-        
+            <div class="maincenter">
+                <div class="deviceBtn">
+                    <div id="deviceplace"></div>
+                </div>
+            </div>
+            <div class="mainfooter">
+                <div style="width: 125px; margin:0px auto;">
+                    <button type="button" id="back" class="back" onclick="location.href='mainpage.html'">回到主頁面</button>
+                </div>
+            </div>
+        </section>
         
         <dialog id="UserLost">
             <h1>糟糕! 甚麼地方出錯了!<br>請再試一次!</h1>
@@ -32,16 +38,15 @@
             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js"
             import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-analytics.js";
             const firebaseConfig = {
-              apiKey: "AIzaSyCF75el0I5Ni587JaOnNVOoqAzWuJG2agY",
-              authDomain: "user-login-time.firebaseapp.com",
-              databaseURL: "https://user-login-time-default-rtdb.firebaseio.com",
-              projectId: "user-login-time",
-              storageBucket: "user-login-time.appspot.com",
-              messagingSenderId: "975739925033",
-              appId: "1:975739925033:web:bbb3193030ed8e5425e238",
-              measurementId: "G-KYLDQQK1GK"
+                apiKey: "AIzaSyCF75el0I5Ni587JaOnNVOoqAzWuJG2agY",
+                authDomain: "user-login-time.firebaseapp.com",
+                databaseURL: "https://user-login-time-default-rtdb.firebaseio.com",
+                projectId: "user-login-time",
+                storageBucket: "user-login-time.appspot.com",
+                messagingSenderId: "975739925033",
+                appId: "1:975739925033:web:bbb3193030ed8e5425e238",
+                measurementId: "G-KYLDQQK1GK"
             };
-          
             const app = initializeApp(firebaseConfig);
             const analytics = getAnalytics(app);
 
@@ -87,6 +92,6 @@
             }
 
             window.onload(deviceCheck());
-          </script>
+        </script>
     </body>
 </html>
