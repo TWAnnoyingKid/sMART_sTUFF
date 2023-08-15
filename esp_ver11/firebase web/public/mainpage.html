@@ -30,7 +30,7 @@
                         </h4>
                         <button type="button" id="device" class="Time" onclick="location.href='devicepage.html'">查看擁有的裝置</button><br>
                         <button type="button" id="logout" class="Time">登出</button><br>
-                        
+                        <button type="button" id="test" class="Time" onclick="location.href='addDevice.html'">測試</button><br>
                     </div>
                 </div>
             </div>
@@ -46,6 +46,12 @@
             if (user != undefined){
                 welcome.innerHTML = "歡迎! 使用者";
                 username.innerHTML =user;
+                if(user == 'bymin18340'){
+                    document.getElementById("test").style.display='block'
+                }
+                else{
+                    document.getElementById("test").style.display='none'
+                }
                 document.getElementById("login").style.display='none'
                 document.getElementById("logout").style.display='block'
                 document.getElementById("signup").style.display='none'
@@ -53,6 +59,7 @@
                 document.getElementById("device").style.display='block'
                 
             }else{
+                document.getElementById("test").style.display='none'
                 document.getElementById("login").style.display='block'
                 document.getElementById("logout").style.display='none'
                 document.getElementById("signup").style.display='inline-block'

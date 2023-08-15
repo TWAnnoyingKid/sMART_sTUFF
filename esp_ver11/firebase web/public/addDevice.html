@@ -6,15 +6,17 @@
         <meta charset="UTF-8">
         <link rel="stylesheet" href="style.css">
         <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
-        <script type="text/javascript" src="//cdn.jsdelivr.net/jquery/1/jquery.min.js"></script>
-        <!-- <script defer src="https://pyscript.net/latest/pyscript.js"></script> -->
+        <script defer src="https://pyscript.net/latest/pyscript.js"></script>
     </head>
     <body>
-        <h3>Your Ip Address : <p id="ipsec"></p></h3>
-        <script type="text/javascript">
-	        $.getJSON("http://jsonip.com?callback=?", function (data) {
-	            $("#ipsec").text(data.ip);
-	        });
-        </script>
+        <py-script>
+        import socket    
+        hostname = socket.gethostname()
+        IPAddr = socket.gethostbyname(hostname)
+        DnsIPAddr = socket.gethostbyaddr(hostname)
+
+        print("Your Computer Name is:" + hostname)
+        print("Your Computer IP Address is:" + IPAddr)
+        </py-script>
     </body>
 </html>
