@@ -15,11 +15,10 @@ TaskHandle_t Task2;
 WebServer server(80);
 
 String header;
-const int LED_PIN = D9;
-const int MODE_btn = D1;
-const int COLOR_btn = D2;
-const int TURNOFF_btn = D3;
-const int rs = D7;
+int MODE_btn = 10;
+int COLOR_btn = 1;
+int TURNOFF_btn = 0;
+int rs = 3;
 
 unsigned long currentTime = millis();
 unsigned long previousTime = 0;
@@ -29,7 +28,7 @@ const long timeoutTime = 2000;
 #define API_KEY "AIzaSyAF4OdtYUAomk_4WnvE5MXb_nphlQ33UyA"
 #define USER_EMAIL "smart.stuff.18340@gmail.com"
 #define USER_PASSWORD "Rayed18340"
-FirebaseData fbdo, fbdo_ALL,;
+FirebaseData fbdo, fbdo_ALL;
 FirebaseAuth auth;
 FirebaseConfig config;
 unsigned long sendDataPrevMillis = 0;
@@ -43,8 +42,6 @@ String controlby = "";
 String controller_MAC = "";
 String D1_TO = "";
 String COLOR = A + "/COLOR";
-// String CONTROLLER = A + "/CONTROLLER";
-// String CONTROL = A + "/CONTROLBYCONTROLLER";
 String MODE = A + "/MODE";
 String CNSTAT = A + "/esp";
 int base_color_set = 1;
@@ -52,7 +49,6 @@ int mode_set = 1;
 
 void setup() {
   Serial.begin(115200);
-  pinMode(LED_PIN, OUTPUT);            digitalWrite(LED_PIN, HIGH);
   pinMode(rs, INPUT_PULLUP);           digitalWrite(rs, HIGH);
   pinMode(MODE_btn, INPUT_PULLUP);     digitalWrite(MODE_btn, HIGH);
   pinMode(COLOR_btn, INPUT_PULLUP);    digitalWrite(COLOR_btn, HIGH);
@@ -61,9 +57,7 @@ void setup() {
   // wifiManager.resetSettings();
   if (digitalRead(rs) == LOW) {
     wifiManager.resetSettings();
-    digitalWrite(LED_PIN, HIGH);
   }
-  digitalWrite(LED_PIN, LOW);
   wifiManager.autoConnect("sMART sTUFF");
 
   A = WiFi.macAddress();
@@ -101,7 +95,8 @@ void setup() {
 void loop() {
   server.handleClient();
   ReadStat();
-  btn_press();
+  mode_btn_press();
+  color_btn_press();
 
   if (Firebase.isTokenExpired()){
     Firebase.refreshToken(&config);
@@ -143,6 +138,7 @@ void mode_btn_press(){
       mode_set == 1;
       delay(200);
     }
+  }
   switch(mode_set){
     case 1:  //恆亮
       Firebase.RTDB.setString(&fbdo_ALL, MODE, "1");
@@ -156,54 +152,46 @@ void mode_btn_press(){
     case 4:  //彩虹
       Firebase.RTDB.setString(&fbdo_ALL, MODE, "4");
       break;
-    case 5:  //彩虹呼吸
-      Firebase.RTDB.setString(&fbdo_ALL, MODE, "5");
-      break;
-    }
   }
 }
+
 void color_btn_press(){
   if (digitalRead(COLOR_btn) == LOW) { //改變顏色
     if (base_color_set < 7){
       base_color_set == base_color_set + 1;
       delay(200);
     }
-    else if (base_color_set == 7){
+    else if (base_color_set == 8){
       base_color_set == 1;
       delay(200);
     }
   }
+  if (digitalRead(TURNOFF_btn) == LOW) { //改變顏色
+    base_color_set = 8;
+  }
   switch(base_color_set){
     case 1: //紅
-      Serial.println(255,0,0);
       Firebase.RTDB.setString(&fbdo_ALL, COLOR, "255000000");
       break;
     case 2: //橙
-      Serial.println(255,97,0);
       Firebase.RTDB.setString(&fbdo_ALL, COLOR, "255097000");
       break;
     case 3: //黃
-      Serial.println(255,255,0);
       Firebase.RTDB.setString(&fbdo_ALL, COLOR, "255255000");
       break;
     case 4: //綠
-      Serial.println(0,255,0);
       Firebase.RTDB.setString(&fbdo_ALL, COLOR, "000255000");
       break;
     case 5: //藍
-      Serial.println(0,0,255);
       Firebase.RTDB.setString(&fbdo_ALL, COLOR, "000000255");
       break;
     case 6: //紫
-      Serial.println(160,32,240);
-      Firebase.RTDB.setString(&fbdo_ALL, COLOR, "160032240");
+      Firebase.RTDB.setString(&fbdo_ALL, COLOR, "100000255");
       break;
     case 7: //白
-      Serial.println(255,255,255);
       Firebase.RTDB.setString(&fbdo_ALL, COLOR, "255255255");
       break;
-    case 8: //黑
-      Serial.println(0,0,0);
+    case 8: //白
       Firebase.RTDB.setString(&fbdo_ALL, COLOR, "000000000");
       break;
   }
